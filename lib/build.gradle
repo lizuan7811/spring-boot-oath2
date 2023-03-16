@@ -1,0 +1,61 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.6.9'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.huaweicloud.com/repository/maven/'}
+	maven { url 'https://maven.google.com/' }
+	maven { url 'https://repo.maven.apache.org/maven2/' }
+}
+/*
+ext {
+	set('springCloudVersion', "2022.0.1")
+}
+*/
+dependencies {
+//	implementation 'org.springframework.cloud:spring-cloud-starter'
+	compileOnly 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-configuration-processor'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	implementation 'org.springframework.boot:spring-boot-starter-parent:2.6.9'
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-stream-redis
+//	implementation 'org.springframework.cloud:spring-cloud-starter-stream-redis:1.0.0.RELEASE'
+	
+//	implementation 'org.springframework.boot:spring-boot-starter-jersey'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+//	implementation 'org.springframework.boot:spring-boot-starter-web-services'
+//	testImplementation 'org.springframework.security:spring-security-test'
+	annotationProcessor 'org.projectlombok:lombok'
+	
+	//DB 
+	// https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc
+	implementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.2.0.jre11'
+}
+/*
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+*/
+tasks.named('test') {
+	useJUnitPlatform()
+}
