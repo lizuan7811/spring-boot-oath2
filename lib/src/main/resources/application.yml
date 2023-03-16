@@ -1,0 +1,24 @@
+server:
+  port: 9999
+debug: true
+logging:
+  config: 'file:src/main/resources/logback.xml'
+spring:
+#  config:
+#    import: "classpath:database/db.properties"
+  datasource:
+    url: jdbc:sqlserver://192.168.126.128:30516;databaseName=lizdb;user=sa;password=Mars@@@7811;encrypt=true;trustServerCertificate=true;
+    username: 'sa'
+    password: 'Mars@@@7811'
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#    url: ${spring.database.url}
+#    username: $spring.database.username}
+#    password: ${spring.database.password}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.SQLServer2012Dialect
+#  security:
+#    user:
+#      name: admin
+#      password: Mars@@@7811
