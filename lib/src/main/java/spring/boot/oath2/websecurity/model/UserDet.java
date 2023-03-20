@@ -14,6 +14,13 @@ import spring.boot.oath2.websecurity.entity.Role;
 
 public class UserDet implements UserDetails{
 
+	@Override
+	public String toString() {
+		return "UserDet [id=" + id + ", username=" + username + ", password=" + password + ", enabled=" + enabled
+				+ ", accountNonExpired=" + accountNonExpired + ", accountNonLocked=" + accountNonLocked
+				+ ", credentialsNonExpired=" + credentialsNonExpired + ", roles=" + roles + "]";
+	}
+
 	private Integer id;
 	private String username;
 	private String password;

@@ -29,13 +29,5 @@ public class Library {
 		
     }
 	
-	@Bean
-	@Primary
-	public Class<User> userClass() {
-	    return User.class;
-	}
-	@Bean
-	public Class<Role> roleClass() {
-	    return Role.class;
-	}
+
 }

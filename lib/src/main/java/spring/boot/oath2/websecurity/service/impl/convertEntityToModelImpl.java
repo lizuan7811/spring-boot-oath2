@@ -5,18 +5,24 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 import org.apache.el.util.ReflectionUtil;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import spring.boot.oath2.websecurity.service.ConvertEntityToModel;
 
+@Component
 public class convertEntityToModelImpl implements ConvertEntityToModel {
 
 	@Override
 	public <F, D> D convertEntity(F clazF, D clazD) {
 
 		try {
+			System.out.println(">>> convertEntity");
 			Field[] fields = clazF.getClass().getDeclaredFields();
-			Arrays.asList(fields).forEach(field -> {
+			Arrays.asList(fields).stream().filter(field->{
+				ReflectionUtils.makeAccessible(field);
+				return !field.getName().equals("serialVersionUID");
+			}).forEach(field -> {
 				try {
 					ReflectionUtils.makeAccessible(field);
 					Field fieldD = clazD.getClass().getDeclaredField(field.getName());

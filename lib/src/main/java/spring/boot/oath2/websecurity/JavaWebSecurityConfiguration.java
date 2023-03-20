@@ -79,6 +79,7 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Bean
 	@Override
 	protected UserDetailsService userDetailsService() {
+		
 		return selfUserDetailService;
 ////		持久化儲存的資料
 //		JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();

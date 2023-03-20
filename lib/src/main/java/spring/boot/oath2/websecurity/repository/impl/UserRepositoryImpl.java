@@ -35,8 +35,7 @@ public class UserRepositoryImpl<T> extends UserRepository<T>{
 		
 		cQuery.where(predName);
 		TypedQuery<T> typeQuery=entityManager.createQuery(cQuery);
-		typeQuery.getResultList().forEach(System.out::println);
-		return typeQuery.getResultList().get(0);
+		return (T)typeQuery.getResultList().get(0);
 	}
 
 	public List<T> getRoleByuid(int id,Class<T> cla) {
@@ -46,7 +45,7 @@ public class UserRepositoryImpl<T> extends UserRepository<T>{
 		Predicate predName =criteriaBuilder.equal(root.get("id"), id);
 		cQuery.where(predName);
 		TypedQuery<T> typeQuery=entityManager.createQuery(cQuery);
-		return typeQuery.getResultList();
+		return (List<T>)typeQuery.getResultList();
 	}
 
 }
