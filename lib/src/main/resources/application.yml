@@ -1,13 +1,13 @@
 server:
   port: 9999
-debug: true
+#debug: true
 logging:
   config: 'file:src/main/resources/logback.xml'
 spring:
 #  config:
 #    import: "classpath:database/db.properties"
   datasource:
-    url: jdbc:sqlserver://192.168.126.128:30516;databaseName=lizdb;user=sa;password=Mars@@@7811;encrypt=true;trustServerCertificate=true;
+    url: jdbc:sqlserver://192.168.126.128:30516;databaseName=lizdb;encrypt=true;trustServerCertificate=true;
     username: 'sa'
     password: 'Mars@@@7811'
     driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
@@ -15,10 +15,22 @@ spring:
 #    username: $spring.database.username}
 #    password: ${spring.database.password}
   jpa:
-    hibernate:
-      ddl-auto: create-drop
-    database-platform: org.hibernate.dialect.SQLServer2012Dialect
-#  security:
-#    user:
-#      name: admin
-#      password: Mars@@@7811
+    properties:
+      hibernate:
+        show_sql: true
+        ddl-auto: validate
+#        naming:
+#          implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+#          physical-naming-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+#        cache:
+#          use_second_level_cache: false
+#          use_query_cache: false
+        query:
+          substitutions: true 1, false 0  
+      database-platform: org.hibernate.dialect.SQLServer2012Dialect
+  security:
+    user:
+      name: admin
+      password: Mars@@@7811
+  thymeleaf:
+    cache: false

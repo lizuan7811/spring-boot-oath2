@@ -6,10 +6,16 @@ package spring.boot.oath2;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication(scanBasePackages = "spring.boot.oath2")
+import spring.boot.oath2.websecurity.entity.Role;
+import spring.boot.oath2.websecurity.entity.User;
+
+
+@SpringBootApplication(scanBasePackages = { "spring.boot.oath2","spring.boot.oath2.websecurity"})
 @EnableJpaRepositories(basePackages = "spring.boot.oath2.websecurity")
 //@EntityScan(basePackages = "spring.boot.oath2.model")
 //須設定掃描service、controller...bean的註解
@@ -22,4 +28,14 @@ public class Library {
 		SpringApplication.run(Library.class,args);
 		
     }
+	
+	@Bean
+	@Primary
+	public Class<User> userClass() {
+	    return User.class;
+	}
+	@Bean
+	public Class<Role> roleClass() {
+	    return Role.class;
+	}
 }

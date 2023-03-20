@@ -11,6 +11,14 @@ configurations {
 		extendsFrom annotationProcessor
 	}
 }
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/resources/"]
+            //exclude 'templates/'
+        }
+    }
+}
 
 repositories {
 	mavenCentral()
@@ -38,7 +46,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-stream-redis
 //	implementation 'org.springframework.cloud:spring-cloud-starter-stream-redis:1.0.0.RELEASE'
-	
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 //	implementation 'org.springframework.boot:spring-boot-starter-jersey'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 //	implementation 'org.springframework.boot:spring-boot-starter-web-services'
