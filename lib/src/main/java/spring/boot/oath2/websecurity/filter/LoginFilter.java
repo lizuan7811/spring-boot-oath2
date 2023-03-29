@@ -25,6 +25,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		if(request.getContentType().equalsIgnoreCase(MediaType.APPLICATION_JSON_VALUE)) {
 			
 			try {
+//				將Json字串轉為指定物件
 				Map<String,String> userInfo=new ObjectMapper().readValue(request.getInputStream(),Map.class);
 				String username=userInfo.get(getUsernameParameter());
 				String password=userInfo.get(getPasswordParameter());

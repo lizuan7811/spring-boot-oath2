@@ -8,16 +8,11 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
-
-import spring.boot.oath2.websecurity.model.RoleDet;
 import spring.boot.oath2.websecurity.repository.UserRepository;
 
-@Configuration
+@Component
 public class UserRepositoryImpl<T> extends UserRepository<T>{
 	
 	@Autowired
@@ -35,8 +30,7 @@ public class UserRepositoryImpl<T> extends UserRepository<T>{
 		
 		cQuery.where(predName);
 		TypedQuery<T> typeQuery=entityManager.createQuery(cQuery);
-		typeQuery.getResultList().forEach(System.out::println);
-		return typeQuery.getResultList().get(0);
+		return (T)typeQuery.getResultList().get(0);
 	}
 
 	public List<T> getRoleByuid(int id,Class<T> cla) {
@@ -46,7 +40,7 @@ public class UserRepositoryImpl<T> extends UserRepository<T>{
 		Predicate predName =criteriaBuilder.equal(root.get("id"), id);
 		cQuery.where(predName);
 		TypedQuery<T> typeQuery=entityManager.createQuery(cQuery);
-		return typeQuery.getResultList();
+		return (List<T>)typeQuery.getResultList();
 	}
 
 }

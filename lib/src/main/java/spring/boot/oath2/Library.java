@@ -21,21 +21,7 @@ import spring.boot.oath2.websecurity.entity.User;
 //須設定掃描service、controller...bean的註解
 //@ComponentScan(basePackages="spring.boot.oath2")
 public class Library {
- 
-	
 	public static void main(String[] args) {
-    
 		SpringApplication.run(Library.class,args);
-		
     }
-	
-	@Bean
-	@Primary
-	public Class<User> userClass() {
-	    return User.class;
-	}
-	@Bean
-	public Class<Role> roleClass() {
-	    return Role.class;
-	}
 }
