@@ -28,10 +28,10 @@ public class SelfUserDetailService implements UserDetailsService{
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		
 		User user =userRepository.findByUsername(username,User.class);
-		System.out.println(user);
+		
 		UserDet userDet= convertEntityToModel.convertEntity(user, new UserDet()) ;
-		System.out.println(userDet);
 
 		if(ObjectUtils.isEmpty(userDet))throw new UsernameNotFoundException("用戶不正確");
 		List<Role>roles=roleRepository.getRoleByuid(userDet.getId(),Role.class);

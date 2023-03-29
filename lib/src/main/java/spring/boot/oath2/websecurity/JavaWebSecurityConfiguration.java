@@ -3,6 +3,7 @@ package spring.boot.oath2.websecurity;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 //		this.selfUserDetailService=selfUserDetailService;
 //	}
 	
-	
+//	需自訂一登入資訊的格式。
 	@Bean
 	public LoginFilter loginFilter() {
 		
@@ -75,11 +76,10 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	}
 	
 	
-	
+//	自定義使用者驗證資料來源，需設定重寫此方法。
 	@Bean
 	@Override
 	protected UserDetailsService userDetailsService() {
-		
 		return selfUserDetailService;
 ////		持久化儲存的資料
 //		JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();
@@ -173,7 +173,19 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 //				.logoutSuccessUrl("/login.html")
 //				.failureForwardUrl("/login.html")
 //				.failureUrl("/login.html")
-				.and().csrf().disable();
+				.and().csrf().disable()
+				.sessionManagement()
+				.maximumSessions(1)
+//				.expiredUrl("/login");
+				.expiredSessionStrategy(event->{
+					HttpServletResponse response=event.getResponse();
+					Map<String,Object> result=new HashMap<>();
+					result.put("status",500);
+					result.put("msg","當前Session已失效");
+					String s=new ObjectMapper().writeValueAsString(result);
+					response.getWriter().println(s);
+					response.flushBuffer();
+				});
 	}
 
 //	@Bean
