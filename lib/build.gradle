@@ -57,6 +57,23 @@ dependencies {
 	implementation 'org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE'
 	implementation 'org.springframework.security:spring-security-jwt:1.1.1.RELEASE'
 	
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-resource-server
+//	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.0.5'
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-client
+	//implementation 'org.springframework.boot:spring-boot-starter-oauth2-client:3.0.5'
+	// https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-client
+	//implementation 'org.springframework.security:spring-security-oauth2-client:6.0.2'
+	// https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-jose
+	//implementation 'org.springframework.security:spring-security-oauth2-jose:6.0.2'
+	
+	
+// https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-jose
+implementation 'org.springframework.security:spring-security-oauth2-jose:5.4.0'
+
+	// https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-client
+implementation 'org.springframework.security:spring-security-oauth2-client:5.4.0'
+	
+	
 	//implementation 'org.springframework.security:spring-security-oauth2-core:6.0.2'
 	// https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-authorization-server
 	//implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.0.1'

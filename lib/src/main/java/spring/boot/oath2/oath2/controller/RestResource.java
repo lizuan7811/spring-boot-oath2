@@ -1,4 +1,4 @@
-package spring.boot.oath2.websecurity.controller;
+package spring.boot.oath2.oath2.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
