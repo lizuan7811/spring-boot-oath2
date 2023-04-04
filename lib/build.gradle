@@ -57,6 +57,15 @@ dependencies {
 	implementation 'org.springframework.security.oauth:spring-security-oauth2:2.5.2.RELEASE'
 	implementation 'org.springframework.security:spring-security-jwt:1.1.1.RELEASE'
 	
+	// https://mvnrepository.com/artifact/org.jboss.resteasy/resteasy-jackson2-provider
+	implementation 'org.jboss.resteasy:resteasy-jackson2-provider:4.7.4.Final'
+
+	implementation 'org.keycloak:keycloak-dependencies-server-all:20.0.2'
+	// https://mvnrepository.com/artifact/org.keycloak/keycloak-spring-boot-starter
+	//implementation 'org.keycloak:keycloak-spring-boot-starter:20.0.2'
+
+
+
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-resource-server
 //	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.0.5'
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-client
