@@ -3,6 +3,9 @@
  */
 package spring.boot.oath2;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -23,5 +26,7 @@ import spring.boot.oath2.websecurity.entity.User;
 public class Library {
 	public static void main(String[] args) {
 		SpringApplication.run(Library.class,args);
+		Map<Object,String>map=new HashMap<>(2);
+		String mapResult=map.put(map, null);
     }
 }
