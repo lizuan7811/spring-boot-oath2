@@ -5,6 +5,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,6 +15,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -21,12 +24,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.swing.text.Document;
 
@@ -35,20 +41,25 @@ import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.ReflectionUtils;
 
 import com.google.common.base.Strings;
 
+import ch.qos.logback.core.joran.util.beans.BeanUtil;
 import ch.qos.logback.core.util.FileUtil;
 
 public class ScrabInternetDatas {
 
 	private static URL STOCKCODE_FQDN;
 	private static URL TARGET_FQDN;
+
 	private final String URL_PATTERN = "(http|https)://[^\\s/$.?#].[^\\s]*$";
 	private final String HTML_URL_PATTERN = "a.*?href=[\\\"']?((https?://)?/?[^\"']+)[\\\"']?.*?>(.+)</a>";
 	private final String FMT_URL_PATTERN = "((https?://)?/?[^\"']+)[\\\"']?.*?";
 
 	private final String STOCK_POINT_PATTERN = "https?://.*/(quote)?/?.*";
+	private final String PREFIX_FQDN = "https://tw.stock.yahoo.com/quote/";
 
 	private final String STOCK_CODE_FILE = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\stockcode.txt";
 	private final String URL_FILE_NAME = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\utls.txt";
@@ -57,6 +68,10 @@ public class ScrabInternetDatas {
 	private final String SPAN_CLASS_UP = "Fz(20px) Fw(b) Lh(1.2) Mend(4px) D(f) Ai(c) C($c-trend-up)";
 	private final String SPAN_CLASS_PRICE = "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-up)";
 
+	private final String START_DIV_CLASS = "Fx(n) W(316px) Bxz(bb) Pstart(16px) Pt(12px)";
+	private final String END_DIV_CLASS = "D(f) Fld(c) Ai(fs)";
+
+	private String localDate = "";
 	static {
 		try {
 			STOCKCODE_FQDN = new URL("https://stock.wespai.com/p/3752");
@@ -70,6 +85,7 @@ public class ScrabInternetDatas {
 	 * 爬蟲類別的建構子
 	 */
 	public ScrabInternetDatas() {
+		this.localDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss"));
 		initStockTable(STOCK_CODE_FILE);
 	}
 
@@ -88,8 +104,10 @@ public class ScrabInternetDatas {
 //		檔案不存在
 			initIfFileNotExist();
 		}
-//		TODO 爬取STOCKCODE_FQDN 的stock code
-		scrawStockCodeAndSaveToFile(fileName);
+//		爬取STOCKCODE_FQDN 的stock code
+//		scrawStockCodeAndSaveToFile(fileName, true);
+		scrawStockCodeAndSaveToFile(fileName, false);
+
 	}
 
 	private void updateFileIfNotValid(String fileName, boolean isValid) {
@@ -99,11 +117,79 @@ public class ScrabInternetDatas {
 		}
 	}
 
-	private void scrawStockCodeAndSaveToFile(String fileName) {
-//		
+	private void scrawStockCodeAndSaveToFile(String fileName, boolean fromInternet) {
+//		讀StockFile檔案存成List。
+		try {
+			if (fromInternet) {
+				List<String> stockFqdnList = Files.readAllLines(Paths.get(fileName));
+				stockFqdnList.stream().forEach(url -> {
+					scrawStockByFqdn(url);
+				});
+			} else {
+				scrawStockByFile(fileName);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 
+	private long randMill() {
+		return new SecureRandom().nextInt(3000);
+	}
+
+	/**
+	 * 讀取Stock的網址並儲存取得的資料
+	 */
+	private void scrawStockByFqdn(String urlString) {
+		ifFileNotExitThenCreate(CONTENT_FILE_NAME);
+		try (BufferedWriter bw = new BufferedWriter(
+				Files.newBufferedWriter(Paths.get(CONTENT_FILE_NAME), StandardOpenOption.APPEND))) {
+
+			Thread.sleep(randMill());
+
+			URL url = new URL(urlString);
+
+			HttpURLConnection connection = ConnectionFactory.getConnectionInst(url);
+
+			StringBuilder sb = new StringBuilder();
+
+			if (connection.getResponseCode() == 200) {
+				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+				String line = "";
+				while ((line = reader.readLine()) != null) {
+					sb.append(line);
+				}
+				StockModel stockModel = parseDate(sb.toString(), true);
+				stockModel.setStockCode(urlString.substring(urlString.lastIndexOf('/')+1));
+				System.out.println(stockModel.toString());
+				bw.write(stockModel.toString());
+				bw.write(System.lineSeparator());
+				reader.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			ConnectionFactory.disConnection();
+			System.out.println("Finally");
+		}
+	}
+
+	private void scrawStockByFile(String fileName){
+		try (BufferedReader br = new BufferedReader(
+				Files.newBufferedReader(Paths.get(CONTENT_FILE_NAME)))) {
+			
+			List<StockModel>modelList=br.lines().map(line->{
+			 return	parseDate(line,false);
+			}).collect(Collectors.toList());
+			
+			System.out.println(modelList.size());
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 //	public void jsoupPrint() {
 //		try {
 //			org.jsoup.nodes.Document doc = Jsoup.connect(TARGET_FQDN.toString()).data("query", "Java")
@@ -121,19 +207,79 @@ public class ScrabInternetDatas {
 	/**
 	 * 解析html內容
 	 */
-	public void parseHtml() {
-		try (BufferedReader br = Files.newBufferedReader(Paths.get(CONTENT_FILE_NAME))) {
-			String rdLine = StringUtils.EMPTY;
-			while ((rdLine = br.readLine()) != null) {
+//	public void parseDate() {
+//		try (BufferedReader br = Files.newBufferedReader(Paths.get(CONTENT_FILE_NAME))) {
+//			String rdLine = StringUtils.EMPTY;
+//			while ((rdLine = br.readLine()) != null) {
+//				org.jsoup.nodes.Document doc = Jsoup.parse(rdLine);
+//				if (org.apache.commons.lang.StringUtils.isBlank(doc.getElementsByClass(START_DIV_CLASS).text()))
+//					continue;
+//				Elements elem = doc.getElementsByClass(START_DIV_CLASS);
+//				Elements spanElem = elem.select("span");
+//				String spanString = spanElem.text();
+//				int firIndex = spanString.indexOf("外盤");
+//				if (firIndex != -1) {
+//					String firString = spanString.substring(0, firIndex);
+//					List<String> fmtFirList = Arrays.asList(firString.split(" ")).stream()
+//							.filter(fir -> fir.matches("^\\(?(\\d)+.*")).collect(Collectors.toList());
+////					fmtFirList.forEach(System.out::println);
+//					System.out.println(transToObject(StockModel.class, fmtFirList));
+//				}
+//				System.out.println("==============================");
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+
+	/**
+	 * 解析html內容
+	 */
+	public StockModel parseDate(String rdLine, boolean fromInternet) {
+		StockModel stockModel = new StockModel();
+		if (StringUtils.isNotBlank(rdLine)) {
+			List<String> fmtFirList = new ArrayList<String>();
+			if (fromInternet) {
 				org.jsoup.nodes.Document doc = Jsoup.parse(rdLine);
-				if (org.apache.commons.lang.StringUtils.isBlank(doc.getElementsByClass(SPAN_CLASS_UP).text()))
-					continue;
-				System.out.println(doc.getElementsByClass(SPAN_CLASS_UP).text());
-				System.out.println(doc.getElementsByClass(SPAN_CLASS_PRICE));
+				Elements elem = doc.getElementsByClass(START_DIV_CLASS);
+				Elements spanElem = elem.select("span");
+				String spanString = spanElem.text();
+				int firIndex = spanString.indexOf("外盤");
+				if (firIndex != -1) {
+					String firString = spanString.substring(0, firIndex);
+					fmtFirList = Arrays.asList(firString.split(" ")).stream()
+							.filter(fir -> fir.matches("^\\(?(\\d)+.*")).collect(Collectors.toList());
+				}
+			} else {
+				fmtFirList = Arrays.asList(rdLine.split(",")).stream().filter(fir -> fir.matches("^\\(?(\\d)+.*"))
+						.collect(Collectors.toList());
 			}
-		} catch (Exception e) {
+			stockModel = (StockModel) transToObject(StockModel.class, fmtFirList);
+		}
+		return stockModel;
+	}
+
+	private <T> Object transToObject(Class<T> clasT, List<String> sourceList) {
+		try {
+			T objT = (T) clasT.getDeclaredConstructor(null).newInstance(null);
+			Field[] fields = clasT.getDeclaredFields();
+			int fieldIndex = 0;
+			for (int i = 0; i <= sourceList.size(); i++) {
+				ReflectionUtils.makeAccessible(fields[i]);
+				if(fields[i].getName().equals("stockCode")) {
+					continue;
+				}
+				fields[i].set(objT, sourceList.get(i-1));
+				fieldIndex = i;
+			}
+			ReflectionUtils.makeAccessible(fields[fieldIndex + 1]);
+			fields[fieldIndex + 1].set(objT, localDate);
+			return objT;
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 
 	/**
@@ -146,31 +292,30 @@ public class ScrabInternetDatas {
 
 			HttpURLConnection connection = ConnectionFactory.getConnectionInst(STOCKCODE_FQDN);
 
-			connection = checkIsMoved(connection);
-
 			if (connection.getResponseCode() == 200) {
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 				String line = "";
 
 				Pattern p = Pattern.compile(FMT_URL_PATTERN);
-
-				List<String> codeList=new ArrayList<String>();
+				Set<String> codeSet = new HashSet<String>();
 				while ((line = reader.readLine()) != null) {
 					if (line.matches(".*youtu.*")) {
 						continue;
 					}
-
 					org.jsoup.nodes.Document doc = Jsoup.parseBodyFragment(line);
 					Elements tableEle = doc.getElementsByTag("body");
 					tableEle.stream().filter(tagValue -> tagValue.text().matches("^(\\d)+$")).forEach(tagValue -> {
-							codeList.add(tagValue.text());
-//							bw.write(tagValue.text());
-//							bw.write(',');
+						codeSet.add(tagValue.text());
 					});
 				}
-				
-				bw.write(StringUtils.join(codeList, ','));
-				
+				codeSet.forEach(code -> {
+					try {
+						bw.write(PREFIX_FQDN + code);
+						bw.write(System.lineSeparator());
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				});
 				reader.close();
 			}
 		} catch (Exception e) {
@@ -307,8 +452,6 @@ public class ScrabInternetDatas {
 				URL url = new URL(oldLink);
 
 				HttpURLConnection connection = ConnectionFactory.getConnectionInst(url);
-
-				connection = checkIsMoved(connection);
 
 				if (connection.getResponseCode() == 200) {
 					BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));

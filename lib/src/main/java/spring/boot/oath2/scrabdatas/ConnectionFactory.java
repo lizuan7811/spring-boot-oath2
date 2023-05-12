@@ -14,7 +14,13 @@ public class ConnectionFactory {
 		httpURLConnection.setRequestProperty("user-agent",
 				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36");
 		httpURLConnection.setInstanceFollowRedirects(false); // 禁止自动重定向
-//		System.out.println(">>> ResponseCode "+connection.getResponseCode());
+		
+		int statusCode = httpURLConnection.getResponseCode();
+		if (statusCode == HttpURLConnection.HTTP_MOVED_PERM || statusCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+			String location = httpURLConnection.getHeaderField("Location"); // 获取重定向后的新 URL 地址
+			URL mvdUrl = new URL(location);
+			httpURLConnection = (HttpURLConnection) mvdUrl.openConnection();
+		}
 		return httpURLConnection;
 	}
 
