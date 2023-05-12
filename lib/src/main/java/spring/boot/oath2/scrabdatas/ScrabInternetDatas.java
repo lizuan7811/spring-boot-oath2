@@ -86,13 +86,14 @@ public class ScrabInternetDatas {
 	 */
 	public ScrabInternetDatas() {
 		this.localDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss"));
-		initStockTable(STOCK_CODE_FILE);
+		boolean fromInternet=false;
+		initStockTable(STOCK_CODE_FILE,fromInternet);
 	}
 
 	/**
 	 * 初始化stock code table
 	 */
-	private void initStockTable(String fileName) {
+	private void initStockTable(String fileName,boolean fromInternet) {
 
 		boolean isExist = ifFileNotExitThenCreate(fileName);
 //		建立儲存stock code的file
@@ -106,7 +107,7 @@ public class ScrabInternetDatas {
 		}
 //		爬取STOCKCODE_FQDN 的stock code
 //		scrawStockCodeAndSaveToFile(fileName, true);
-		scrawStockCodeAndSaveToFile(fileName, false);
+		scrawStockCodeAndSaveToFile(fileName, fromInternet);
 
 	}
 
@@ -123,10 +124,10 @@ public class ScrabInternetDatas {
 			if (fromInternet) {
 				List<String> stockFqdnList = Files.readAllLines(Paths.get(fileName));
 				stockFqdnList.stream().forEach(url -> {
-					scrawStockByFqdn(url);
+					scrawStockByFqdn(url,fromInternet);
 				});
 			} else {
-				scrawStockByFile(fileName);
+				scrawStockByFile(fileName,fromInternet);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -141,7 +142,7 @@ public class ScrabInternetDatas {
 	/**
 	 * 讀取Stock的網址並儲存取得的資料
 	 */
-	private void scrawStockByFqdn(String urlString) {
+	private void scrawStockByFqdn(String urlString,boolean fromInternet) {
 		ifFileNotExitThenCreate(CONTENT_FILE_NAME);
 		try (BufferedWriter bw = new BufferedWriter(
 				Files.newBufferedWriter(Paths.get(CONTENT_FILE_NAME), StandardOpenOption.APPEND))) {
@@ -160,7 +161,7 @@ public class ScrabInternetDatas {
 				while ((line = reader.readLine()) != null) {
 					sb.append(line);
 				}
-				StockModel stockModel = parseDate(sb.toString(), true);
+				StockModel stockModel = parseDate(sb.toString(), fromInternet);
 				stockModel.setStockCode(urlString.substring(urlString.lastIndexOf('/')+1));
 				System.out.println(stockModel.toString());
 				bw.write(stockModel.toString());
@@ -175,15 +176,14 @@ public class ScrabInternetDatas {
 		}
 	}
 
-	private void scrawStockByFile(String fileName){
+	private void scrawStockByFile(String fileName,boolean fromInternet){
 		try (BufferedReader br = new BufferedReader(
 				Files.newBufferedReader(Paths.get(CONTENT_FILE_NAME)))) {
 			
 			List<StockModel>modelList=br.lines().map(line->{
-			 return	parseDate(line,false);
+			 return	parseDate(line,fromInternet);
 			}).collect(Collectors.toList());
 			
-			System.out.println(modelList.size());
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -249,13 +249,15 @@ public class ScrabInternetDatas {
 					String firString = spanString.substring(0, firIndex);
 					fmtFirList = Arrays.asList(firString.split(" ")).stream()
 							.filter(fir -> fir.matches("^\\(?(\\d)+.*")).collect(Collectors.toList());
+					stockModel = (StockModel) transToObject(StockModel.class, fmtFirList);
 				}
 			} else {
-				fmtFirList = Arrays.asList(rdLine.split(",")).stream().filter(fir -> fir.matches("^\\(?(\\d)+.*"))
+				fmtFirList = Arrays.asList(rdLine.split(";")).stream().filter(fir -> fir.matches("^\\(?(\\d)+.*"))
 						.collect(Collectors.toList());
+				stockModel = (StockModel) fileToObject(StockModel.class, fmtFirList);
 			}
-			stockModel = (StockModel) transToObject(StockModel.class, fmtFirList);
 		}
+		System.out.println(stockModel.toString());
 		return stockModel;
 	}
 
@@ -282,6 +284,26 @@ public class ScrabInternetDatas {
 		return null;
 	}
 
+	
+	/**
+	 * 從檔案轉為物件
+	 */
+	private <T> Object fileToObject(Class<T> clasT, List<String> sourceList) {
+		try {
+			T objT = (T) clasT.getDeclaredConstructor(null).newInstance(null);
+			Field[] fields = clasT.getDeclaredFields();
+			for (int i = 0; i < sourceList.size(); i++) {
+				ReflectionUtils.makeAccessible(fields[i]);
+				fields[i].set(objT, sourceList.get(i));
+			}
+			return objT;
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	/**
 	 * 檔案若不存在就建立
 	 */

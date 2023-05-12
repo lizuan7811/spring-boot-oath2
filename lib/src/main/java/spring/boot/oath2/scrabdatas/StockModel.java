@@ -96,12 +96,12 @@ public class StockModel {
 
 	@Override
 	public String toString() {
-		return stockCode+","+finalPrice + "," + opening + "," + highestPrice
-				+ "," + lowestPrice + "," + avgPrice + "," + totalFinalPrice
-				+ "," + yestFinalPrice + "," + quoteChange + "," + upAndDown
-				+ "," + totalAmount + "," + yestAmount + "," + amplitude
-				+ "," + inner + "," + innerPercent + "," + external
-				+ "," + externalPercent + "," + dateTime;
+		return stockCode+";"+finalPrice + ";" + opening + ";" + highestPrice
+				+ ";" + lowestPrice + ";" + avgPrice + ";" + totalFinalPrice
+				+ ";" + yestFinalPrice + ";" + quoteChange + ";" + upAndDown
+				+ ";" + totalAmount + ";" + yestAmount + ";" + amplitude
+				+ ";" + inner + ";" + innerPercent + ";" + external
+				+ ";" + externalPercent + ";" + dateTime;
 	}
 	
 	
