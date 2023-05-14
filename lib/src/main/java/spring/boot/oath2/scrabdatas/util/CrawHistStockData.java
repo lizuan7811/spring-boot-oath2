@@ -24,6 +24,7 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
 public class CrawHistStockData {
 
 //	https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=20220101&stockNo=0050
+//	https://mis.twse.com.tw/stock/api/getStockInfo.jsp?json=1&delay=0&ex_ch=tse_2330.tw%7Ctse_0050.tw%7C
 	private static String STOCK_HIST_FQDN = "https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=${DATE}&stockNo=${STOCKNO}";
 	private final String STOCK_PURE_CODE_FILE = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\stockpurecode.txt";
 	private final String STOCK_HISTDATA_FILE = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\stockhistdata.txt";
@@ -60,8 +61,11 @@ public class CrawHistStockData {
 				buildQuoteUrl(code).stream().forEach(url -> {
 					try {
 						Thread.sleep(ConnectionFactory.randMill());
-
+						System.out.println(url);
 						bw.write(function.apply(url));
+						bw.flush();
+						System.out.println("===========");
+						
 					} catch (IOException | InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -84,7 +88,9 @@ public class CrawHistStockData {
 					String rdLine = Strings.EMPTY;
 					while (StringUtils.isNotBlank(rdLine = reader.readLine())) {
 						System.out.println(rdLine);
-						sb.append(rdLine + System.lineSeparator());
+						if(rdLine.indexOf("\"total\":0")==-1) {
+							sb.append(rdLine + System.lineSeparator());
+						}
 					}
 					ConnectionFactory.disConnection();
 				} catch (IOException e) {
