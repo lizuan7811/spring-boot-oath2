@@ -1,6 +1,6 @@
 server:
   port: 9999
-#debug: true
+  debug: true
 logging:
   config: 'file:src/main/resources/logback.xml'
 spring:
@@ -32,15 +32,15 @@ spring:
     user:
       name: admin
       password: Mars@@@7811
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: google01
-            client-secret: google01
-          facebook:
-            client-id: facebook01
-            client-secret: facebook01
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id: google01
+#            client-secret: google01
+#          facebook:
+#            client-id: facebook01
+#            client-secret: facebook01
 #    oauth2:
 #      resource:
 #        filter-order: 3
