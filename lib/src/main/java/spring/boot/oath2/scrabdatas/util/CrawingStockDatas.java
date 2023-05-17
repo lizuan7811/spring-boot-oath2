@@ -38,7 +38,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
-
 import spring.boot.oath2.scrabdatas.entity.StockEntity;
 import spring.boot.oath2.scrabdatas.model.StockModel;
 
@@ -79,6 +78,18 @@ public class CrawingStockDatas {
 		}
 	}
 
+	/**
+	 * 爬蟲類別的建構子
+	 */
+	public CrawingStockDatas() {
+		this.localDate = NormalUtils.getLocalDate();
+	}
+
+	public CrawingStockDatas(boolean fromInternet) {
+		this.localDate = NormalUtils.getLocalDate();
+		initStockTable(STOCK_CODE_FILE, fromInternet);
+	}
+
 	public List<StockModel> getStockModelList() {
 		return this.stockModelList;
 	}
@@ -100,18 +111,6 @@ public class CrawingStockDatas {
 	}
 
 	/**
-	 * 爬蟲類別的建構子
-	 */
-	public CrawingStockDatas() {
-		this.localDate = NormalUtils.getLocalDate();
-	}
-
-	public CrawingStockDatas(boolean fromInternet) {
-		this.localDate = NormalUtils.getLocalDate();
-		initStockTable(STOCK_CODE_FILE, fromInternet);
-	}
-
-	/**
 	 * 初始化stock code table
 	 */
 	private void initStockTable(String fileName, boolean fromInternet) {
@@ -127,7 +126,6 @@ public class CrawingStockDatas {
 			initIfFileNotExist(fileName);
 		}
 //		爬取STOCKCODE_FQDN 的stock code
-//		scrawStockCodeAndSaveToFile(fileName, true);
 		scrawStockCodeAndSaveToFile(fileName, fromInternet, this.stockModelList);
 
 	}
@@ -268,12 +266,15 @@ public class CrawingStockDatas {
 
 					String[] firArray = firString.split(" ");
 
-					fmtFirList = Arrays.asList(firArray).stream().filter(fir -> fir.matches("^\\(?(\\d)+.*")||fir.matches("^\\(?-\\(?-?.*")).collect(Collectors.toList());
+					fmtFirList = Arrays.asList(firArray).stream()
+							.filter(fir -> fir.matches("^\\(?(\\d)+.*") || fir.matches("^\\(?-\\(?-?.*"))
+							.collect(Collectors.toList());
 
 					stockModel = (StockModel) NormalUtils.transToObject(StockModel.class, fmtFirList);
 				}
 			} else {
-				fmtFirList = Arrays.asList(rdLine.split(";")).stream().filter(fir -> fir.matches("^\\(?(\\d)+.*")||fir.matches("^\\(?-\\(?-?.*"))
+				fmtFirList = Arrays.asList(rdLine.split(";")).stream()
+						.filter(fir -> fir.matches("^\\(?(\\d)+.*") || fir.matches("^\\(?-\\(?-?.*"))
 						.collect(Collectors.toList());
 				stockModel = (StockModel) NormalUtils.fileToObject(StockModel.class, fmtFirList);
 			}
@@ -573,13 +574,13 @@ public class CrawingStockDatas {
 			}
 		};
 	}
-	
+
 	public void initStockCodeFile() {
-		
-		String fileName=STOCK_PURE_CODE_FILE;
-		
+
+		String fileName = STOCK_PURE_CODE_FILE;
+
 		NormalUtils.ifFileNotExitThenCreate(fileName);
-		
+
 		try (BufferedWriter bw = new BufferedWriter(
 				Files.newBufferedWriter(Paths.get(fileName), StandardOpenOption.APPEND))) {
 			Thread.sleep(1000);

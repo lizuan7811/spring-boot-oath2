@@ -17,8 +17,14 @@ public interface CrawingStockService {
 	
 	public List<Map<String,StockModel>> addAndUpdateContent();
 	
+	/**
+	 * 更新資料內容
+	 */
 	public void updateContents();
 	
-	public void saveOneContents();
+	/**
+	 * 更新一筆資料
+	 */
+	public void saveOneContents(Object object);
 	
 }

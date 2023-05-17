@@ -54,12 +54,15 @@ public class CrawingStockServiceImpl implements CrawingStockService {
 		stockRepo.saveAll(crawingStockDatas.getStockEntityList());
 	}
 
+	/**
+	 * 更新時資料內容時，使用的更新CrawingStockData類別的方法
+	 */
 	private void setCrawingStockDatas(CrawingStockDatas crawingStockDatas) {
 		this.crawingStockDatas = crawingStockDatas;
 	}
 
 	@Override
-	public void saveOneContents() {
+	public void saveOneContents(Object object) {
 		StockEntity se = crawingStockDatas.getStockEntityList().get(0);
 		log.debug(">>> {}",se);
 		stockRepo.save(se);

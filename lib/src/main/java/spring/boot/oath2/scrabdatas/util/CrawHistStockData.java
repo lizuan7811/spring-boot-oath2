@@ -33,15 +33,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import spring.boot.oath2.scrabdatas.entity.StockHistEntity;
 import spring.boot.oath2.scrabdatas.model.HistJsonModel;
 import spring.boot.oath2.scrabdatas.model.StockHistModel;
 import spring.boot.oath2.scrabdatas.persistent.StockHistRepo;
 
 @Component
+@Slf4j
 public class CrawHistStockData {
-
+//  歷史資料
 //	https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=20220101&stockNo=0050
+//	即時資料
 //	https://mis.twse.com.tw/stock/api/getStockInfo.jsp?json=1&delay=0&ex_ch=tse_2330.tw%7Ctse_0050.tw%7C
 	private static String STOCK_HIST_FQDN = "https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=${DATE}&stockNo=${STOCKNO}";
 	private final String STOCK_PURE_CODE_FILE = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\stockpurecode.txt";
@@ -53,22 +56,23 @@ public class CrawHistStockData {
 
 	@Autowired
 	private StockHistRepo stockHistRepo;
+
 	/**
 	 * 查詢歷史資料方法(開始位置)
 	 */
-	public void startScrawHistData(boolean saveToDb) {
+	public void startScrawHistData(boolean saveToDb,boolean isHist) {
 		if (saveToDb) {
-			startScrawHistToDb(getParseDataFunc());
+			startScrawHistToDb(getParseDataFunc(),isHist);
 		} else {
 			NormalUtils.ifFileNotExitThenCreate(STOCK_HISTDATA_FILE);
-			startScrawHistToFile(STOCK_HISTDATA_FILE, getParseDataFunc());
+			startScrawHistToFile(STOCK_HISTDATA_FILE, getParseDataFunc(),isHist);
 		}
 	}
 
 	/**
 	 * 取得要解析Data的Function
 	 */
-	public  Function<String, HistJsonModel> getParseDataFunc() {
+	public Function<String, HistJsonModel> getParseDataFunc() {
 		return new Function<String, HistJsonModel>() {
 			@Override
 			public HistJsonModel apply(String t) {
@@ -86,18 +90,18 @@ public class CrawHistStockData {
 					}
 					ConnectionFactory.disConnection();
 				} catch (IOException e) {
-					e.printStackTrace();
+					log.debug(">>> getParseDataFunc IOException: {} ",e.getMessage());
 				}
 				return (HistJsonModel) NormalUtils.parseJson(sb.toString(), HistJsonModel.class);
 			}
 		};
 	}
-	
+
 	/**
 	 * 取得已經解析過的Data的Function
 	 */
 	public Function<HistJsonModel, List<Object>> getParsedDataFunc(String code) {
-		 return new Function<HistJsonModel, List<Object>>() {
+		return new Function<HistJsonModel, List<Object>>() {
 			@Override
 			public List<Object> apply(HistJsonModel histJsonModel) {
 
@@ -109,91 +113,97 @@ public class CrawHistStockData {
 						List<List<String>> dataList = (List<List<String>>) field.get(histJsonModel);
 
 						dataList.stream().forEach(innerDataList -> {
-							StockHistModel stockHistModel = (StockHistModel)NormalUtils.transToObject(StockHistModel.class, innerDataList);
+							StockHistModel stockHistModel = (StockHistModel) NormalUtils
+									.transToObject(StockHistModel.class, innerDataList);
 							stockHistModel.setStockCode(code);
 							modelList.add(stockHistModel);
 						});
-// TODO從這裡開始。
 					} catch (NoSuchFieldException | SecurityException | IllegalArgumentException
 							| IllegalAccessException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						log.debug(">>> getParsedDataFunc Exceptions: {} ",e.getMessage());
 					}
 				}
 				return modelList;
 			}
 		};
 	}
-	
+
 	/**
 	 * 產生查詢使用的網址
 	 */
-	private List<String> buildQuoteUrl(String code) {
-		Map<String, List<String>> quoteUrlMap = new HashMap<String, List<String>>();
+	private List<String> buildQuoteUrl(String code,boolean scrawHist) {
 		List<String> scrawList = new ArrayList<String>();
-		int startYear = 2010;
-		for (int j = 0; j <= 10; j++) {
-			int year = startYear + j;
-			for (int month = 1; month <= 12; month++) {
-				String ldt = LocalDateTime.of(year, month, 1, 0, 0, 0).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-				scrawList.add(STOCK_HIST_FQDN.replace("${DATE}", ldt).replace("${STOCKNO}", code));
+		LocalDateTime curT = LocalDateTime.now().minusDays(1);
+		if(scrawHist) {
+			int startYear = 2010;
+			for (int j = 0; j <= 10; j++) {
+				int year = startYear + j;
+				for (int month = 1; month <= 12; month++) {
+					LocalDateTime ldt = LocalDateTime.of(year, month, 1, 0, 0, 0);
+					if (ldt.isBefore(curT)) {
+						String ldtStr = ldt.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+						scrawList.add(STOCK_HIST_FQDN.replace("${DATE}", ldtStr).replace("${STOCKNO}", code));
+					}
+				}
 			}
+		}else{
+			scrawList.add(STOCK_HIST_FQDN.replace("${DATE}", curT.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"))).replace("${STOCKNO}", code));
 		}
-		quoteUrlMap.put(code, scrawList);
 		return scrawList;
 	}
 
 	/**
 	 * 讀歷史資料存資料庫
 	 */
-	private <E, T> void startScrawHistToDb(Function<String, T> parseJsonFunc) {
+	private <T> void startScrawHistToDb(Function<String, T> parseJsonFunc,boolean isHist) {
 		try {
 			List<String> codeList = Files.readAllLines(Paths.get(STOCK_PURE_CODE_FILE));
 			codeList.stream().forEach(code -> {
-				buildQuoteUrl(code).stream().forEach(url -> {
+				buildQuoteUrl(code,isHist).stream().forEach(url -> {
 					try {
 						System.out.println(url);
 						Thread.sleep(ConnectionFactory.randMill());
 						T histJsonModel = (T) parseJsonFunc.apply(url);
-						List<Object> modelList =  (List<Object>) (getParsedDataFunc(code).apply((HistJsonModel)histJsonModel));
+						List<Object> modelList = (List<Object>) (getParsedDataFunc(code)
+								.apply((HistJsonModel) histJsonModel));
 //						若model不為空，就轉換成Entity
 						if (!modelList.isEmpty()) {
 							modelList.stream().forEach(model -> {
-								System.out.println(">>>~~~model:\t"+model.toString());
+								System.out.println(">>>~~~model:\t" + model.toString());
 								consumeAndSaveToDb(model);
 							});
 						}
 					} catch (InterruptedException | SecurityException | IllegalArgumentException e) {
-						e.printStackTrace();
+						log.debug(">>> startScrawHistToDb Exceptions: {} ",e.getMessage());
 					}
 				});
 			});
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.debug(">>> startScrawHistToDb IOException: {} ",e.getMessage());
 		}
 	}
 
 	/**
 	 * 達1000筆資料儲存一次DB
 	 */
-	private void consumeAndSaveToDb(Object model){
-		StockHistEntity target=new StockHistEntity();
+	private void consumeAndSaveToDb(Object model) {
+		StockHistEntity target = new StockHistEntity();
 		BeanUtils.copyProperties(model, target);
 		histEntityList.add(target);
-		if(histEntityList.size()==1000) {
+		if (histEntityList.size() == 1000) {
 			stockHistRepo.saveAll(histEntityList);
 			histEntityList.clear();
 		}
 	}
-	
+
 	/**
 	 * 讀歷史資料存實體檔
 	 */
-	private String startScrawHistToFile(String fileName, Function<String, HistJsonModel> function) {
+	private String startScrawHistToFile(String fileName, Function<String, HistJsonModel> function,boolean isHist) {
 		try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(fileName), StandardOpenOption.APPEND)) {
 			List<String> codeList = Files.readAllLines(Paths.get(STOCK_PURE_CODE_FILE));
 			codeList.stream().forEach(code -> {
-				buildQuoteUrl(code).stream().forEach(url -> {
+				buildQuoteUrl(code,isHist).stream().forEach(url -> {
 					try {
 						Thread.sleep(ConnectionFactory.randMill());
 						bw.write(function.apply(url).toString());
@@ -201,7 +211,7 @@ public class CrawHistStockData {
 						System.out.println("===========");
 
 					} catch (IOException | InterruptedException e) {
-						e.printStackTrace();
+						log.debug(">>> startScrawHistToFile Exceptions: {} ",e.getMessage());
 					}
 				});
 			});

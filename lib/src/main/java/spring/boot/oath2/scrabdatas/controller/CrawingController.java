@@ -10,6 +10,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,6 +45,9 @@ public class CrawingController {
 		return respString;
 	}
 
+	/**
+	 * 更新股票內容
+	 */
 	@GetMapping(value = "/quoteStock/update")
 	public String updateStockContent() {
 		log.debug(">>> Update Stock Content!");
@@ -51,17 +55,28 @@ public class CrawingController {
 		return "update";
 	}
 
+	/**
+	 * 開始爬取歷史資料
+	 */
 	@GetMapping(value = "/scrawinghist", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String startToScrawStockHistData(HttpServletRequest httpRequest, boolean saveToDb) {
+	public String startToScrawStockHistData(HttpServletRequest httpRequest, boolean saveToDb,boolean isHist) {
 		log.debug(">>> start to scrawing hist data!");
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				stockHistDataService.startToScrawHistData(saveToDb);
+				stockHistDataService.startToScrawHistData(saveToDb,isHist);
 			}
 		}).start();
 
 		return "start to scrawing hist data";
+	}
+	
+	@PostMapping(value = "/srawtimelydata", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String getTimelyData(List<String> codeList) {
+		log.debug(">>> start to scrawing timely data!");
+
+//		 TODO查詢指定的即時資料
+		return "";
 	}
 
 }
