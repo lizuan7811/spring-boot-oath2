@@ -15,37 +15,53 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
 import spring.boot.oath2.scrabdatas.service.CrawingStockService;
+import spring.boot.oath2.scrabdatas.service.StockHistDataService;
 import twitter4j.HttpResponse;
 
 @RestController
 @RequestMapping("/stock")
 @Slf4j
 public class CrawingController {
-	
+
 	private final CrawingStockService crawingStockService;
+	private final StockHistDataService stockHistDataService;
+
 	@Autowired
-	public CrawingController(CrawingStockService crawingStockService) {
-		this.crawingStockService=crawingStockService;
+	public CrawingController(CrawingStockService crawingStockService, StockHistDataService stockHistDataService) {
+		this.crawingStockService = crawingStockService;
+		this.stockHistDataService = stockHistDataService;
 	}
-	
-	@GetMapping(value="/quoteStock",consumes=MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
+
+	@GetMapping(value = "/quoteStock", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<String> getStockContent(HttpServletRequest httpRequest) {
-		List<String> respList=crawingStockService.quoteStockContents();
+		List<String> respList = crawingStockService.quoteStockContents();
 		return respList;
 	}
-	
-	@GetMapping(value="/quoteStock/{stockCode}",consumes=MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
-	public String getStockContent(HttpServletRequest httpRequest,@PathParam("stockCode") String stockCode) {
-		String respString=crawingStockService.quoteStockContentByCode(stockCode);
+
+	@GetMapping(value = "/quoteStock/{stockCode}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String getStockContent(HttpServletRequest httpRequest, @PathParam("stockCode") String stockCode) {
+		String respString = crawingStockService.quoteStockContentByCode(stockCode);
 		return respString;
 	}
-	
-	@GetMapping(value="/quoteStock/update")
+
+	@GetMapping(value = "/quoteStock/update")
 	public String updateStockContent() {
 		log.debug(">>> Update Stock Content!");
 		crawingStockService.updateContents();
-//		crawingStockService.saveOneContents();
-
 		return "update";
 	}
+
+	@GetMapping(value = "/scrawinghist", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public String startToScrawStockHistData(HttpServletRequest httpRequest, boolean saveToDb) {
+		log.debug(">>> start to scrawing hist data!");
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				stockHistDataService.startToScrawHistData(saveToDb);
+			}
+		}).start();
+
+		return "start to scrawing hist data";
+	}
+
 }

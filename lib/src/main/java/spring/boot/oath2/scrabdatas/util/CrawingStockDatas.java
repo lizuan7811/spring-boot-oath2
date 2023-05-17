@@ -103,11 +103,11 @@ public class CrawingStockDatas {
 	 * 爬蟲類別的建構子
 	 */
 	public CrawingStockDatas() {
-		this.localDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+		this.localDate = NormalUtils.getLocalDate();
 	}
 
 	public CrawingStockDatas(boolean fromInternet) {
-		this.localDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+		this.localDate = NormalUtils.getLocalDate();
 		initStockTable(STOCK_CODE_FILE, fromInternet);
 	}
 
@@ -116,7 +116,7 @@ public class CrawingStockDatas {
 	 */
 	private void initStockTable(String fileName, boolean fromInternet) {
 
-		boolean isExist = ifFileNotExitThenCreate(fileName);
+		boolean isExist = NormalUtils.ifFileNotExitThenCreate(fileName);
 //		建立儲存stock code的file
 		if (isExist) {
 //			檔案存在且時間不超過30天。
@@ -161,7 +161,7 @@ public class CrawingStockDatas {
 	 */
 	private StockModel scrawStockByFqdn(String urlString, boolean fromInternet) {
 		StockModel stockModel = null;
-		ifFileNotExitThenCreate(CONTENT_FILE_NAME);
+		NormalUtils.ifFileNotExitThenCreate(CONTENT_FILE_NAME);
 		try (BufferedWriter bw = new BufferedWriter(
 				Files.newBufferedWriter(Paths.get(CONTENT_FILE_NAME), StandardOpenOption.APPEND))) {
 
@@ -270,65 +270,64 @@ public class CrawingStockDatas {
 
 					fmtFirList = Arrays.asList(firArray).stream().filter(fir -> fir.matches("^\\(?(\\d)+.*")||fir.matches("^\\(?-\\(?-?.*")).collect(Collectors.toList());
 
-					stockModel = (StockModel) transToObject(StockModel.class, fmtFirList);
+					stockModel = (StockModel) NormalUtils.transToObject(StockModel.class, fmtFirList);
 				}
 			} else {
 				fmtFirList = Arrays.asList(rdLine.split(";")).stream().filter(fir -> fir.matches("^\\(?(\\d)+.*")||fir.matches("^\\(?-\\(?-?.*"))
 						.collect(Collectors.toList());
-				stockModel = (StockModel) fileToObject(StockModel.class, fmtFirList);
+				stockModel = (StockModel) NormalUtils.fileToObject(StockModel.class, fmtFirList);
 			}
 		}
 		System.out.println(stockModel.toString());
 		return stockModel;
 	}
 
-	/**
-	 * 將網路爬取的資料轉為Object
-	 */
-	private <T> Object transToObject(Class<T> clasT, List<String> sourceList) {
-		try {
-			T objT = (T) clasT.getDeclaredConstructor(null).newInstance(null);
-			Field[] fields = clasT.getDeclaredFields();
-			int fieldIndex = 0;
-			for (int i = 0; i <= sourceList.size(); i++) {
-				ReflectionUtils.makeAccessible(fields[i]);
-				if (fields[i].getName().equals("stockCode")) {
-					continue;
-				}
-				fields[i].set(objT, sourceList.get(i - 1));
-				fieldIndex = i;
-			}
-			ReflectionUtils.makeAccessible(fields[fieldIndex + 1]);
-			fields[fieldIndex + 1].set(objT, localDate);
-			return objT;
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+//	/**
+//	 * 將網路爬取的資料轉為Object
+//	 */
+//	private <T> Object transToObject(Class<T> clasT, List<String> sourceList) {
+//		try {
+//			T objT = (T) clasT.getDeclaredConstructor(null).newInstance(null);
+//			Field[] fields = clasT.getDeclaredFields();
+//			int fieldIndex = 0;
+//			for (int i = 0; i <= sourceList.size(); i++) {
+//				ReflectionUtils.makeAccessible(fields[i]);
+//				if (fields[i].getName().equals("stockCode")) {
+//					continue;
+//				}
+//				fields[i].set(objT, sourceList.get(i - 1));
+//				fieldIndex = i;
+//			}
+//			if(objT instanceof StockModel) {
+//				ReflectionUtils.makeAccessible(fields[fieldIndex + 1]);
+//				fields[fieldIndex + 1].set(objT, localDate);
+//			}
+//			return objT;
+//		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+//				| NoSuchMethodException | SecurityException e) {
+//			e.printStackTrace();
+//		}
+//		return null;
+//	}
 
 	/**
 	 * 從文件的資料轉為Obejct
 	 */
-	private <T> Object fileToObject(Class<T> clasT, List<String> sourceList) {
-		try {
-			T objT = (T) clasT.getDeclaredConstructor(null).newInstance(null);
-			Field[] fields = clasT.getDeclaredFields();
-			int fidIndex = fields.length - 1;
-			for (int i = 0; i < sourceList.size(); i++) {
-				ReflectionUtils.makeAccessible(fields[i]);
-				fields[i].set(objT, sourceList.get(i));
-			}
-			ReflectionUtils.makeAccessible(fields[fidIndex]);
-			fields[fidIndex].set(objT, localDate);
-			return objT;
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+//	private <T> Object fileToObject(Class<T> clasT, List<String> sourceList) {
+//		try {
+//			T objT = (T) clasT.getDeclaredConstructor(null).newInstance(null);
+//			Field[] fields = clasT.getDeclaredFields();
+//			for (int i = 0; i < sourceList.size(); i++) {
+//				ReflectionUtils.makeAccessible(fields[i]);
+//				fields[i].set(objT, sourceList.get(i));
+//			}
+//			return objT;
+//		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+//				| NoSuchMethodException | SecurityException e) {
+//			e.printStackTrace();
+//		}
+//		return null;
+//	}
 
 	/**
 	 * 檔案若不存在就建立
@@ -420,21 +419,6 @@ public class CrawingStockDatas {
 	}
 
 	/**
-	 * 檔案若不存在，則建立檔案。
-	 */
-	private boolean ifFileNotExitThenCreate(String fileName) {
-		boolean isExist = Paths.get(fileName).toFile().exists();
-		if (!isExist) {
-			try {
-				Paths.get(fileName).toFile().createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return isExist;
-	}
-
-	/**
 	 * 判斷檔案時間是否在範圍內
 	 */
 	private boolean ifFileTimeValid(String fileName) {
@@ -489,9 +473,9 @@ public class CrawingStockDatas {
 				continue;
 			}
 
-			ifFileNotExitThenCreate(URL_FILE_NAME);
+			NormalUtils.ifFileNotExitThenCreate(URL_FILE_NAME);
 
-			ifFileNotExitThenCreate(CONTENT_FILE_NAME);
+			NormalUtils.ifFileNotExitThenCreate(CONTENT_FILE_NAME);
 
 			try (BufferedWriter bw = new BufferedWriter(
 					Files.newBufferedWriter(Paths.get(URL_FILE_NAME), StandardOpenOption.APPEND));
@@ -594,7 +578,7 @@ public class CrawingStockDatas {
 		
 		String fileName=STOCK_PURE_CODE_FILE;
 		
-		ifFileNotExitThenCreate(fileName);
+		NormalUtils.ifFileNotExitThenCreate(fileName);
 		
 		try (BufferedWriter bw = new BufferedWriter(
 				Files.newBufferedWriter(Paths.get(fileName), StandardOpenOption.APPEND))) {
