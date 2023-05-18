@@ -60,12 +60,12 @@ public class CrawHistStockData {
 	/**
 	 * 查詢歷史資料方法(開始位置)
 	 */
-	public void startScrawHistData(boolean saveToDb,boolean isHist) {
+	public void startScrawHistData(boolean saveToDb, boolean isHist) {
 		if (saveToDb) {
-			startScrawHistToDb(getParseDataFunc(),isHist);
+			startScrawHistToDb(getParseDataFunc(), isHist);
 		} else {
 			NormalUtils.ifFileNotExitThenCreate(STOCK_HISTDATA_FILE);
-			startScrawHistToFile(STOCK_HISTDATA_FILE, getParseDataFunc(),isHist);
+			startScrawHistToFile(STOCK_HISTDATA_FILE, getParseDataFunc(), isHist);
 		}
 	}
 
@@ -90,7 +90,7 @@ public class CrawHistStockData {
 					}
 					ConnectionFactory.disConnection();
 				} catch (IOException e) {
-					log.debug(">>> getParseDataFunc IOException: {} ",e.getMessage());
+					log.debug(">>> getParseDataFunc IOException: {} ", e.getMessage());
 				}
 				return (HistJsonModel) NormalUtils.parseJson(sb.toString(), HistJsonModel.class);
 			}
@@ -120,7 +120,7 @@ public class CrawHistStockData {
 						});
 					} catch (NoSuchFieldException | SecurityException | IllegalArgumentException
 							| IllegalAccessException e) {
-						log.debug(">>> getParsedDataFunc Exceptions: {} ",e.getMessage());
+						log.debug(">>> getParsedDataFunc Exceptions: {} ", e.getMessage());
 					}
 				}
 				return modelList;
@@ -131,10 +131,10 @@ public class CrawHistStockData {
 	/**
 	 * 產生查詢使用的網址
 	 */
-	private List<String> buildQuoteUrl(String code,boolean scrawHist) {
+	private List<String> buildQuoteUrl(String code, boolean scrawHist) {
 		List<String> scrawList = new ArrayList<String>();
 		LocalDateTime curT = LocalDateTime.now().minusDays(1);
-		if(scrawHist) {
+		if (scrawHist) {
 			int startYear = 2010;
 			for (int j = 0; j <= 10; j++) {
 				int year = startYear + j;
@@ -146,8 +146,10 @@ public class CrawHistStockData {
 					}
 				}
 			}
-		}else{
-			scrawList.add(STOCK_HIST_FQDN.replace("${DATE}", curT.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"))).replace("${STOCKNO}", code));
+		} else {
+			scrawList.add(STOCK_HIST_FQDN
+					.replace("${DATE}", curT.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+					.replace("${STOCKNO}", code));
 		}
 		return scrawList;
 	}
@@ -155,11 +157,11 @@ public class CrawHistStockData {
 	/**
 	 * 讀歷史資料存資料庫
 	 */
-	private <T> void startScrawHistToDb(Function<String, T> parseJsonFunc,boolean isHist) {
+	private <T> void startScrawHistToDb(Function<String, T> parseJsonFunc, boolean isHist) {
 		try {
 			List<String> codeList = Files.readAllLines(Paths.get(STOCK_PURE_CODE_FILE));
 			codeList.stream().forEach(code -> {
-				buildQuoteUrl(code,isHist).stream().forEach(url -> {
+				buildQuoteUrl(code, isHist).stream().forEach(url -> {
 					try {
 						System.out.println(url);
 						Thread.sleep(ConnectionFactory.randMill());
@@ -174,12 +176,20 @@ public class CrawHistStockData {
 							});
 						}
 					} catch (InterruptedException | SecurityException | IllegalArgumentException e) {
-						log.debug(">>> startScrawHistToDb Exceptions: {} ",e.getMessage());
+						log.debug(">>> startScrawHistToDb Exceptions: {} ", e.getMessage());
 					}
 				});
 			});
+			flushListToDb();
 		} catch (IOException e) {
-			log.debug(">>> startScrawHistToDb IOException: {} ",e.getMessage());
+			log.debug(">>> startScrawHistToDb IOException: {} ", e.getMessage());
+		}
+	}
+
+	private void flushListToDb() {
+		if (histEntityList.size() != 0) {
+			stockHistRepo.saveAll(histEntityList);
+			histEntityList.clear();
 		}
 	}
 
@@ -199,11 +209,11 @@ public class CrawHistStockData {
 	/**
 	 * 讀歷史資料存實體檔
 	 */
-	private String startScrawHistToFile(String fileName, Function<String, HistJsonModel> function,boolean isHist) {
+	private String startScrawHistToFile(String fileName, Function<String, HistJsonModel> function, boolean isHist) {
 		try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(fileName), StandardOpenOption.APPEND)) {
 			List<String> codeList = Files.readAllLines(Paths.get(STOCK_PURE_CODE_FILE));
 			codeList.stream().forEach(code -> {
-				buildQuoteUrl(code,isHist).stream().forEach(url -> {
+				buildQuoteUrl(code, isHist).stream().forEach(url -> {
 					try {
 						Thread.sleep(ConnectionFactory.randMill());
 						bw.write(function.apply(url).toString());
@@ -211,7 +221,7 @@ public class CrawHistStockData {
 						System.out.println("===========");
 
 					} catch (IOException | InterruptedException e) {
-						log.debug(">>> startScrawHistToFile Exceptions: {} ",e.getMessage());
+						log.debug(">>> startScrawHistToFile Exceptions: {} ", e.getMessage());
 					}
 				});
 			});
