@@ -56,7 +56,7 @@ public class ConnectionFactory {
 	}
 
 	public static long randMill() {
-		return new SecureRandom().nextInt(5000)+1500;
+		return new SecureRandom().nextInt(3000)+1000;
 	}
 
 }

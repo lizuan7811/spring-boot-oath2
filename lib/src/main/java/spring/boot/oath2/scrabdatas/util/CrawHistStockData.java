@@ -131,25 +131,30 @@ public class CrawHistStockData {
 	/**
 	 * 產生查詢使用的網址
 	 */
-	private List<String> buildQuoteUrl(String code, boolean scrawHist) {
+	private List<String> buildQuoteUrl(String code,boolean scrawHist) {
 		List<String> scrawList = new ArrayList<String>();
 		LocalDateTime curT = LocalDateTime.now().minusDays(1);
-		if (scrawHist) {
-			int startYear = 2010;
-			for (int j = 0; j <= 10; j++) {
+//		判斷是否抓歷史資料
+		if(scrawHist) {
+			int startYear = 2021;
+			boolean stopFlag=false;
+			for (int j = 0; j <= 2; j++) {
 				int year = startYear + j;
 				for (int month = 1; month <= 12; month++) {
 					LocalDateTime ldt = LocalDateTime.of(year, month, 1, 0, 0, 0);
 					if (ldt.isBefore(curT)) {
 						String ldtStr = ldt.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 						scrawList.add(STOCK_HIST_FQDN.replace("${DATE}", ldtStr).replace("${STOCKNO}", code));
+					}else {
+						stopFlag=true;
+						break;
 					}
 				}
+				if(stopFlag)break;
 			}
-		} else {
-			scrawList.add(STOCK_HIST_FQDN
-					.replace("${DATE}", curT.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd")))
-					.replace("${STOCKNO}", code));
+		}else{
+//			若非抓歷史資料，那就是抓前一日資料
+			scrawList.add(STOCK_HIST_FQDN.replace("${DATE}", curT.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"))).replace("${STOCKNO}", code));
 		}
 		return scrawList;
 	}
@@ -160,7 +165,7 @@ public class CrawHistStockData {
 	private <T> void startScrawHistToDb(Function<String, T> parseJsonFunc, boolean isHist) {
 		try {
 			List<String> codeList = Files.readAllLines(Paths.get(STOCK_PURE_CODE_FILE));
-			codeList.stream().forEach(code -> {
+			codeList.stream().filter(cd->Integer.valueOf(cd)>=Integer.valueOf("1737")).forEach(code -> {
 				buildQuoteUrl(code, isHist).stream().forEach(url -> {
 					try {
 						System.out.println(url);
