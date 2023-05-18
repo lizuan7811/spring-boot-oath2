@@ -86,6 +86,8 @@ public class CrawHistStockData {
 						if (rdLine.indexOf("\"total\":0") == -1) {
 							sb.append(rdLine);
 							sb.append(System.lineSeparator());
+						}else {
+							System.out.println("else: "+rdLine);
 						}
 					}
 					ConnectionFactory.disConnection();
@@ -136,7 +138,7 @@ public class CrawHistStockData {
 		LocalDateTime curT = LocalDateTime.now().minusDays(1);
 //		判斷是否抓歷史資料
 		if(scrawHist) {
-			int startYear = 2021;
+			int startYear = 2010;
 			boolean stopFlag=false;
 			for (int j = 0; j <= 2; j++) {
 				int year = startYear + j;
