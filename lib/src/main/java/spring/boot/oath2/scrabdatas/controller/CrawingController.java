@@ -28,6 +28,8 @@ public class CrawingController {
 	private final StockHistDataService stockHistDataService;
 
 	@Autowired
+	private spring.boot.oath2.scrabdatas.property.ScrawProperty scrawProperty;
+	@Autowired
 	public CrawingController(CrawingStockService crawingStockService, StockHistDataService stockHistDataService) {
 		this.crawingStockService = crawingStockService;
 		this.stockHistDataService = stockHistDataService;
@@ -59,8 +61,12 @@ public class CrawingController {
 	 * 開始爬取歷史資料
 	 */
 	@GetMapping(value = "/scrawinghist", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public String startToScrawStockHistData(HttpServletRequest httpRequest, boolean saveToDb,boolean isHist) {
+	public String startToScrawStockHistData(boolean saveToDb,boolean isHist) {
 		log.debug(">>> start to scrawing hist data!");
+		System.setProperty("http.proxyHost", scrawProperty.getHost());
+		System.setProperty("http.proxyPort", scrawProperty.getPort());
+		System.setProperty("https.proxyHost", scrawProperty.getHost());
+		System.setProperty("https.proxyPort", scrawProperty.getPort());
 		new Thread(new Runnable() {
 			@Override
 			public void run() {

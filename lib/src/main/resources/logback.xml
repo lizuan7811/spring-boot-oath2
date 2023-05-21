@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="LOG_HOME" value="D:/2.ProgramSpace/netflixeurekabuild/src/main/resources/calsyslog" />
+    <property name="LOG_HOME" value="./logs_dir/calsyslog" />
     <property name="LOG_NAME" value="callsysInfo.log" />
     <property name="CHARSET" value="UTF-8" />
     <property name="PATTERN_MDC" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [${LOG_LEVEL_PATTERN:-%5p}] --- %-40.40logger{39} : %msg%n" />    

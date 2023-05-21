@@ -11,9 +11,13 @@ import java.util.Objects;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class ConnectionFactory {
+import org.springframework.beans.factory.annotation.Autowired;
 
+import spring.boot.oath2.scrabdatas.property.ScrawProperty;
+
+public class ConnectionFactory {
 	private static HttpsURLConnection httpsURLConnection;
+	
 	private static BufferedReader bufReader = null;
 
 	public static HttpsURLConnection getConnectionInst(URL url) throws IOException {
@@ -55,8 +59,8 @@ public class ConnectionFactory {
 		return bufReader;
 	}
 
-	public static long randMill() {
-		return new SecureRandom().nextInt(3000)+1000;
+	public static long randMill(int baseRandTime,int randTime) {
+		return new SecureRandom().nextInt(randTime)+baseRandTime;
 	}
 
 }

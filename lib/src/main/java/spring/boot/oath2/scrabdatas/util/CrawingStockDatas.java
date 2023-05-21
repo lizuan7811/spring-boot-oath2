@@ -35,35 +35,33 @@ import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import spring.boot.oath2.scrabdatas.entity.StockEntity;
 import spring.boot.oath2.scrabdatas.model.StockModel;
+import spring.boot.oath2.scrabdatas.property.ScrawProperty;
 
 @Component
 public class CrawingStockDatas {
 
+	@Autowired
+	private ScrawProperty scrawProperty;
+	
 	private static URL STOCKCODE_FQDN;
 	private static URL TARGET_FQDN;
 
 	private final String URL_PATTERN = "(http|https)://[^\\s/$.?#].[^\\s]*$";
 	private final String FMT_URL_PATTERN = "((https?://)?/?[^\"']+)[\\\"']?.*?";
 //	private final String HTML_URL_PATTERN = "a.*?href=[\\\"']?((https?://)?/?[^\"']+)[\\\"']?.*?>(.+)</a>";
-
 	private final String STOCK_POINT_PATTERN = "https?://.*/(quote)?/?.*";
 	private final String PREFIX_FQDN = "https://tw.stock.yahoo.com/quote/";
-
 	private final String STOCK_PURE_CODE_FILE = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\stockpurecode.txt";
 	private final String STOCK_CODE_FILE = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\stockcode.txt";
 	private final String URL_FILE_NAME = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\utls.txt";
 	private final String CONTENT_FILE_NAME = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\contents.txt";
-
-//	private final String SPAN_CLASS_UP = "Fz(20px) Fw(b) Lh(1.2) Mend(4px) D(f) Ai(c) C($c-trend-up)";
-//	private final String SPAN_CLASS_PRICE = "Fz(32px) Fw(b) Lh(1) Mend(16px) D(f) Ai(c) C($c-trend-up)";
-
 	private final String START_DIV_CLASS = "Fx(n) W(316px) Bxz(bb) Pstart(16px) Pt(12px)";
-//	private final String END_DIV_CLASS = "D(f) Fld(c) Ai(fs)";
 
 	private String localDate = "";
 
@@ -114,7 +112,6 @@ public class CrawingStockDatas {
 	 * 初始化stock code table
 	 */
 	private void initStockTable(String fileName, boolean fromInternet) {
-
 		boolean isExist = NormalUtils.ifFileNotExitThenCreate(fileName);
 //		建立儲存stock code的file
 		if (isExist) {
@@ -127,7 +124,6 @@ public class CrawingStockDatas {
 		}
 //		爬取STOCKCODE_FQDN 的stock code
 		scrawStockCodeAndSaveToFile(fileName, fromInternet, this.stockModelList);
-
 	}
 
 	private void updateFileIfNotValid(String fileName, boolean isValid) {
@@ -163,7 +159,7 @@ public class CrawingStockDatas {
 		try (BufferedWriter bw = new BufferedWriter(
 				Files.newBufferedWriter(Paths.get(CONTENT_FILE_NAME), StandardOpenOption.APPEND))) {
 
-			Thread.sleep(ConnectionFactory.randMill());
+			Thread.sleep(ConnectionFactory.randMill(scrawProperty.getBaseRandTime(),scrawProperty.getRandTime()));
 
 			URL url = new URL(urlString);
 
@@ -352,9 +348,6 @@ public class CrawingStockDatas {
 					}
 					org.jsoup.nodes.Document doc = Jsoup.parseBodyFragment(line);
 					Elements tableEle = doc.getElementsByTag("body");
-//					tableEle.stream().filter(tagValue -> tagValue.text().matches("^(\\d){4,6}$")).forEach(tagValue -> {
-//						System.out.println(tagValue.text());
-//					});
 					tableEle.stream().filter(tagValue -> tagValue.text().matches("^(\\d){4,6}$")).forEach(tagValue -> {
 						codeSet.add(tagValue.text());
 					});

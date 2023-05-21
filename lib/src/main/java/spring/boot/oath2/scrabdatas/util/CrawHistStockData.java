@@ -38,6 +38,7 @@ import spring.boot.oath2.scrabdatas.entity.StockHistEntity;
 import spring.boot.oath2.scrabdatas.model.HistJsonModel;
 import spring.boot.oath2.scrabdatas.model.StockHistModel;
 import spring.boot.oath2.scrabdatas.persistent.StockHistRepo;
+import spring.boot.oath2.scrabdatas.property.ScrawProperty;
 
 @Component
 @Slf4j
@@ -46,16 +47,19 @@ public class CrawHistStockData {
 //	https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=20220101&stockNo=0050
 //	即時資料
 //	https://mis.twse.com.tw/stock/api/getStockInfo.jsp?json=1&delay=0&ex_ch=tse_2330.tw%7Ctse_0050.tw%7C
-	private static String STOCK_HIST_FQDN = "https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=${DATE}&stockNo=${STOCKNO}";
-	private final String STOCK_PURE_CODE_FILE = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\stockpurecode.txt";
-	private final String STOCK_HISTDATA_FILE = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\stockhistdata.txt";
-	private final String TEST = "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\test.txt";
+	// private static String STOCK_HIST_FQDN =
+	// "https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=${DATE}&stockNo=${STOCKNO}";
+	// private final String STOCK_PURE_CODE_FILE =
+	// "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\stockpurecode.txt";
+	// private final String STOCK_HISTDATA_FILE =
+	// "C:\\Users\\Lizuan\\Desktop\\DevTest_dir\\stockhistdata.txt";
 
 	private final List<StockHistEntity> histEntityList = new ArrayList<StockHistEntity>();
-//	private final List<StockHistModel> stockModelList = new ArrayList<StockHistModel>();
 
 	@Autowired
 	private StockHistRepo stockHistRepo;
+	@Autowired
+	private ScrawProperty scrawProperty;
 
 	/**
 	 * 查詢歷史資料方法(開始位置)
@@ -64,8 +68,8 @@ public class CrawHistStockData {
 		if (saveToDb) {
 			startScrawHistToDb(getParseDataFunc(), isHist);
 		} else {
-			NormalUtils.ifFileNotExitThenCreate(STOCK_HISTDATA_FILE);
-			startScrawHistToFile(STOCK_HISTDATA_FILE, getParseDataFunc(), isHist);
+			NormalUtils.ifFileNotExitThenCreate(scrawProperty.getStockHistdataFile());
+			startScrawHistToFile(scrawProperty.getStockHistdataFile(), getParseDataFunc(), isHist);
 		}
 	}
 
@@ -86,8 +90,8 @@ public class CrawHistStockData {
 						if (rdLine.indexOf("\"total\":0") == -1) {
 							sb.append(rdLine);
 							sb.append(System.lineSeparator());
-						}else {
-							System.out.println("else: "+rdLine);
+						} else {
+							System.out.println("else: " + rdLine);
 						}
 					}
 					ConnectionFactory.disConnection();
@@ -133,30 +137,34 @@ public class CrawHistStockData {
 	/**
 	 * 產生查詢使用的網址
 	 */
-	private List<String> buildQuoteUrl(String code,boolean scrawHist) {
+	private List<String> buildQuoteUrl(String code, boolean scrawHist) {
 		List<String> scrawList = new ArrayList<String>();
 		LocalDateTime curT = LocalDateTime.now().minusDays(1);
 //		判斷是否抓歷史資料
-		if(scrawHist) {
-			int startYear = 2010;
-			boolean stopFlag=false;
-			for (int j = 0; j <= 2; j++) {
+		int startYear=scrawProperty.getStartYear();
+		System.out.println(startYear);
+		if (scrawHist) {
+			boolean stopFlag = false;
+			for (int j = 0; j <= 10; j++) {
 				int year = startYear + j;
 				for (int month = 1; month <= 12; month++) {
 					LocalDateTime ldt = LocalDateTime.of(year, month, 1, 0, 0, 0);
 					if (ldt.isBefore(curT)) {
 						String ldtStr = ldt.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-						scrawList.add(STOCK_HIST_FQDN.replace("${DATE}", ldtStr).replace("${STOCKNO}", code));
-					}else {
-						stopFlag=true;
+						scrawList.add(scrawProperty.getStockHistFqdn().replace("${DATE}", ldtStr).replace("${STOCKNO}", code));
+					} else {
+						stopFlag = true;
 						break;
 					}
 				}
-				if(stopFlag)break;
+				if (stopFlag)
+					break;
 			}
-		}else{
+		} else {
 //			若非抓歷史資料，那就是抓前一日資料
-			scrawList.add(STOCK_HIST_FQDN.replace("${DATE}", curT.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"))).replace("${STOCKNO}", code));
+			scrawList.add(scrawProperty.getStockHistFqdn()
+					.replace("${DATE}", curT.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+					.replace("${STOCKNO}", code));
 		}
 		return scrawList;
 	}
@@ -166,12 +174,15 @@ public class CrawHistStockData {
 	 */
 	private <T> void startScrawHistToDb(Function<String, T> parseJsonFunc, boolean isHist) {
 		try {
-			List<String> codeList = Files.readAllLines(Paths.get(STOCK_PURE_CODE_FILE));
-			codeList.stream().filter(cd->Integer.valueOf(cd)>=Integer.valueOf("1737")).forEach(code -> {
+			System.out.println(scrawProperty.getStockPureCodeFile());
+			List<String> codeList = Files.readAllLines(Paths.get(scrawProperty.getStockPureCodeFile()));
+			
+			codeList.stream().filter(cd -> Integer.valueOf(cd) >= Integer.valueOf("1737")).forEach(code -> {
 				buildQuoteUrl(code, isHist).stream().forEach(url -> {
 					try {
 						System.out.println(url);
-						Thread.sleep(ConnectionFactory.randMill());
+						log.debug(">>> url: {} ", url);
+						Thread.sleep(ConnectionFactory.randMill(scrawProperty.getBaseRandTime(),scrawProperty.getRandTime()));
 						T histJsonModel = (T) parseJsonFunc.apply(url);
 						List<Object> modelList = (List<Object>) (getParsedDataFunc(code)
 								.apply((HistJsonModel) histJsonModel));
@@ -187,9 +198,11 @@ public class CrawHistStockData {
 					}
 				});
 			});
-			flushListToDb();
+			
 		} catch (IOException e) {
 			log.debug(">>> startScrawHistToDb IOException: {} ", e.getMessage());
+		}finally {
+			flushListToDb();
 		}
 	}
 
@@ -218,11 +231,11 @@ public class CrawHistStockData {
 	 */
 	private String startScrawHistToFile(String fileName, Function<String, HistJsonModel> function, boolean isHist) {
 		try (BufferedWriter bw = Files.newBufferedWriter(Paths.get(fileName), StandardOpenOption.APPEND)) {
-			List<String> codeList = Files.readAllLines(Paths.get(STOCK_PURE_CODE_FILE));
+			List<String> codeList = Files.readAllLines(Paths.get(scrawProperty.getStockPureCodeFile()));
 			codeList.stream().forEach(code -> {
 				buildQuoteUrl(code, isHist).stream().forEach(url -> {
 					try {
-						Thread.sleep(ConnectionFactory.randMill());
+						Thread.sleep(ConnectionFactory.randMill(scrawProperty.getBaseRandTime(),scrawProperty.getRandTime()));
 						bw.write(function.apply(url).toString());
 						bw.flush();
 						System.out.println("===========");
