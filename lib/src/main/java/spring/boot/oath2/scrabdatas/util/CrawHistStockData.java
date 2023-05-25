@@ -137,18 +137,19 @@ public class CrawHistStockData {
 	/**
 	 * 產生查詢使用的網址
 	 */
-	private List<String> buildQuoteUrl(String code, boolean scrawHist) {
+	private List<String> buildQuoteUrl(String code, boolean isHist) {
 		List<String> scrawList = new ArrayList<String>();
 		LocalDateTime curT = LocalDateTime.now().minusDays(1);
 //		判斷是否抓歷史資料
 		int startYear=scrawProperty.getStartYear();
 		System.out.println(startYear);
-		if (scrawHist) {
+		if (isHist) {
 			boolean stopFlag = false;
 			for (int j = 0; j <= 10; j++) {
 				int year = startYear + j;
 				for (int month = 1; month <= 12; month++) {
 					LocalDateTime ldt = LocalDateTime.of(year, month, 1, 0, 0, 0);
+//					判斷時間在今日之前
 					if (ldt.isBefore(curT)) {
 						String ldtStr = ldt.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 						scrawList.add(scrawProperty.getStockHistFqdn().replace("${DATE}", ldtStr).replace("${STOCKNO}", code));
@@ -163,7 +164,7 @@ public class CrawHistStockData {
 		} else {
 //			若非抓歷史資料，那就是抓前一日資料
 			scrawList.add(scrawProperty.getStockHistFqdn()
-					.replace("${DATE}", curT.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+					.replace("${DATE}", curT.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
 					.replace("${STOCKNO}", code));
 		}
 		return scrawList;
@@ -177,7 +178,7 @@ public class CrawHistStockData {
 			System.out.println(scrawProperty.getStockPureCodeFile());
 			List<String> codeList = Files.readAllLines(Paths.get(scrawProperty.getStockPureCodeFile()));
 			
-			codeList.stream().filter(cd -> Integer.valueOf(cd) >= Integer.valueOf("1737")).forEach(code -> {
+			codeList.stream().forEach(code -> {
 				buildQuoteUrl(code, isHist).stream().forEach(url -> {
 					try {
 						System.out.println(url);

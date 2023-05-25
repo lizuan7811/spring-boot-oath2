@@ -1,5 +1,5 @@
 server:
-  port: 9992
+  port: 9999
   debug: true
 logging:
   config: 'file:src/main/resources/logback.xml'
@@ -29,9 +29,9 @@ spring:
 #          substitutions: true 1, false 0  
 #      database-platform: org.hibernate.dialect.SQLServer2012Dialect
   security:
-    user:
-      name: admin
-      password: Mars@@@7811
+   user:
+      name: "admin"
+      password: "Mars@@@7811"
 #    oauth2:
 #      client:
 #        registration:
@@ -44,8 +44,23 @@ spring:
 #    oauth2:
 #      resource:
 #        filter-order: 3
-  thymeleaf:
-    cache: false
+#  thymeleaf:
+#    thymeleaf:
+    # 开启视图解析
+#    enabled: false
+    #编码格式
+#    encoding: UTF-8
+    #前缀配置
+#    prefix: /templates/
+    # 后缀配置
+#    suffix: .html
+    #是否使用缓存 开发环境时不设置缓存
+#    cache: false
+    # 格式为 HTML 格式
+#    mode: HTML5
+    # 配置类型
+#    servlet:
+#      content-type: text/html
 scraw:
   stock-hist-fqdn: "https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=${DATE}&stockNo=${STOCKNO}"
   stock-pure-code-file: "src/main/resources/stockpurecode.txt"

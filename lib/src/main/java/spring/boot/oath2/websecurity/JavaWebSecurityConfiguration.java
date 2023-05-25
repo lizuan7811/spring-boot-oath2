@@ -47,11 +47,11 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 //	需自訂一登入資訊的格式。
 	@Bean
 	public LoginFilter loginFilter() {
-		
+		System.out.println(">>>  LoginFilter loginFilter() ");
 		LoginFilter loginFilter=new LoginFilter();
 		loginFilter.setFilterProcessesUrl("/doLogin");
-		loginFilter.setUsernameParameter("uname");
-		loginFilter.setPasswordParameter("passwd");
+		loginFilter.setUsernameParameter("Username");
+		loginFilter.setPasswordParameter("Password");
 		loginFilter.setAuthenticationManager(authenticationManagerBean());
 		
 		loginFilter.setAuthenticationSuccessHandler((req,resp,authentication)->{
@@ -114,24 +114,24 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 //	}
 	
 //	自定義的方法，全部都要自定義
-	@Autowired
-	public void configure(AuthenticationManagerBuilder builder) {
-		try {
-			System.out.println("自定義AuthenticationManager:\t"+builder);
-			builder.userDetailsService(selfUserDetailService);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-//		System.out.println("自定義AuthenticationManager:"+builder);
+//	@Autowired
+//	public void configure(AuthenticationManagerBuilder builder) {
 //		try {
-//			builder.userDetailsService(userDetailsService());
+//			System.out.println("自定義AuthenticationManager:\t"+builder);
+//			builder.userDetailsService(selfUserDetailService);
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-	}
+//		
+////		System.out.println("自定義AuthenticationManager:"+builder);
+////		try {
+////			builder.userDetailsService(userDetailsService());
+////		} catch (Exception e) {
+////			e.printStackTrace();
+////		}
+//	}
 	
-//	將AuthenticationManager開放讓其他地方是永
+//	將AuthenticationManager開放讓其他地方使用
 	@Bean
 	@Override
 	public AuthenticationManager authenticationManagerBean() {
@@ -149,17 +149,18 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 		http.authorizeRequests()
 		.mvcMatchers("/login.html").permitAll()
+		.mvcMatchers("/histstock/*").permitAll()
 		.mvcMatchers("/index/*").permitAll().anyRequest()
-				.authenticated().and().formLogin().loginPage("/login.html")
+				.authenticated().and().formLogin().loginPage("/startlogin")
 				.loginProcessingUrl("/doLogin")
-				.usernameParameter("uname")
-				.passwordParameter("passwd")
+				.usernameParameter("Username")
+				.passwordParameter("Password")
 //		只適合傳統web開發
 //		.successForwardUrl("/index/hello");
 
 //		前後端分離方式
-				.successHandler(new SelfDefiAuth())
-				.failureHandler(new SelfDefiAuthFail())
+//				.successHandler(new SelfDefiAuth())
+//				.failureHandler(new SelfDefiAuthFail())
 				.and()
 				.logout()
 //				.logoutUrl("/logout")

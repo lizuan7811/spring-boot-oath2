@@ -19,7 +19,8 @@ public class SelfDefiAuth implements AuthenticationSuccessHandler {
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException {
-
+		System.out.println(">>> onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,\r\n"
+				+ "			Authentication authentication)");
 		Map<String,Object>result=new HashMap<>();
 		result.put("msg","LoginSuccessed");
 		result.put("status",200);

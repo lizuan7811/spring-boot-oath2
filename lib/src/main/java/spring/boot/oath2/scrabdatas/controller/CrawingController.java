@@ -20,7 +20,7 @@ import spring.boot.oath2.scrabdatas.service.StockHistDataService;
 import twitter4j.HttpResponse;
 
 @RestController
-@RequestMapping("/stock")
+@RequestMapping("/crawing")
 @Slf4j
 public class CrawingController {
 
