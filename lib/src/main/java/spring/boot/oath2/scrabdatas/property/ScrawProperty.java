@@ -9,8 +9,10 @@ public class ScrawProperty {
 	private String stockHistFqdn;
 	private String stockPureCodeFile;
 	private String stockHistdataFile;
-	private String host;
-	private String port;
+	private String httpHost;
+	private String httpPort;
+	private String httpsHost;
+	private String httpsPort;
 	private Integer startYear;
 	private Integer baseRandTime;
 	private Integer randTime;

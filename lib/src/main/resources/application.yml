@@ -66,7 +66,9 @@ scraw:
   stock-pure-code-file: "src/main/resources/stockpurecode.txt"
   stock-histdata-file: "src/main/resources/stockhistdata.txt"
   startYear: 2010
-  host: '65.108.250.129'
-  port: '8080'
+  http-host: '65.108.250.129'
+  http-port: '8080'
+  https-host: '65.108.250.129'
+  https-port: '8080'
   base-rand-time: 2000
   rand-time: 1000
