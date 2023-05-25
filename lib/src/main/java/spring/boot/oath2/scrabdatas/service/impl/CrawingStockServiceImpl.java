@@ -13,6 +13,9 @@ import spring.boot.oath2.scrabdatas.persistent.StockRepo;
 import spring.boot.oath2.scrabdatas.service.CrawingStockService;
 import spring.boot.oath2.scrabdatas.util.CrawingStockDatas;
 
+/**
+ * 查詢歷史資料 Impl
+ */
 @Service
 @Slf4j
 public class CrawingStockServiceImpl implements CrawingStockService {

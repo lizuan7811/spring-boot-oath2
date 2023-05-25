@@ -40,6 +40,9 @@ import spring.boot.oath2.scrabdatas.model.StockHistModel;
 import spring.boot.oath2.scrabdatas.persistent.StockHistRepo;
 import spring.boot.oath2.scrabdatas.property.ScrawProperty;
 
+/**
+ * 爬Stock 歷史資料Tool
+ */
 @Component
 @Slf4j
 public class CrawHistStockData {
