@@ -176,21 +176,35 @@ dependencies {
 		    envList.add('-' + envName)
 		}
 	
-	task buildDev(dependsOn: ['build']) {
-	    group = 'build'
+	task build_dev(dependsOn: ['build']) {
+	    group = 'build_dev'
 	    description = "Assembles and tests this project for dev"
 	}
 
-	task bootRunDev(dependsOn: ['bootRun']) {
-	    group = 'application'
+	task bootRun_dev(dependsOn: ['bootRun']) {
+	    group = 'application_dev'
 	    description = "Runs this project as a Spring Boot application for dev"
+	}
+	
+		task build_ut(dependsOn: ['build']) {
+	    group = 'build_ut'
+	    description = "Assembles and tests this project for ut"
+	}
+
+	task bootRun_ut(dependsOn: ['bootRun']) {
+	    group = 'application_ut'
+	    description = "Runs this project as a Spring Boot application for ut"
 	}
 	
 	task {
 	    all {
 	        if (it.name.endsWith("_dev")) {
-	            it.dependsOn(buildDev)
-	            it.dependsOn(bootRunDev)
+	            it.dependsOn(build-dev)
+	            it.dependsOn(bootRun-dev)
+	        }
+			if (it.name.endsWith("_ut")) {
+	            it.dependsOn(build-ut)
+	            it.dependsOn(bootRun-ut)
 	        }
 	    }
 	}
@@ -208,8 +222,12 @@ task copySource(type: Copy){
 	from("src/main/resources"){
 		eachFile{f -> 
 				def propertyName = f.name
-				if(envArr.any{propertyName.contains(it)}) {
-		    		f.exclude()
+				println ">>> envName : "+envName;
+				if(envArr.any{propertyName.contains(it.substring(1)) && !propertyName.contains(envName.substring(envName.indexOf('_')+1))}) {
+			    	f.exclude()
+				}
+				if(envName.contains('dev') && propertyName.contains(envName.substring(envName.indexOf('_')+1))){
+					f.include();
 				}
 			}
 		}

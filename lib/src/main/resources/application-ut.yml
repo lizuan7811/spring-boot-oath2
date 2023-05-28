@@ -5,7 +5,7 @@ logging:
   config: 'config/logback.xml'
 spring:
   config:
-    import: "database/db.properties"
+    import: "database/db-ut.properties"
   http:
     proxy:
       host: 65.108.250.129
@@ -59,3 +59,7 @@ scraw:
   stock-pure-code-file: "config/stockpurecode.txt"
   stock-histdata-file: "config/stockhistdata.txt"
   startYear: 2010
+  host: '65.108.250.129'
+  port: '8080'
+  base-rand-time: 2000
+  rand-time: 1000

@@ -12,13 +12,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
+import spring.boot.oath2.scrabdatas.exception.FindHistDataException;
 import spring.boot.oath2.scrabdatas.model.StockHistModel;
+import spring.boot.oath2.scrabdatas.request.HistStockDtRangeRequest;
 import spring.boot.oath2.scrabdatas.request.HistStockRequest;
 import spring.boot.oath2.scrabdatas.response.HistStockResponse;
 import spring.boot.oath2.scrabdatas.service.HistStockDataService;
 
+/**
+ * 查詢歷史Stock Data的Controller
+ */
+@Slf4j
 @RestController
-@RequestMapping(value = "/histstock")
+@RequestMapping(value = "/findhist")
 public class HistStockDataController {
 
 	private final HistStockDataService histStockDataService;
@@ -28,33 +35,19 @@ public class HistStockDataController {
 		this.histStockDataService = histStockDataService;
 	}
 
-//	歷史資料在這個Controller中只能被查詢，不增加insert以及delete方法
-	@PostMapping(value = "/all", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public Object selectHists() {
-
-		return null;
-	}
-
-	@PostMapping(value = "/stkcode", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	/**
+	 * 查一個code一段時間
+	 */
+	@PostMapping(value = "/stkcode/findhist", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public HistStockResponse selectHists(@RequestBody HistStockRequest histStockRequest) {
 		HistStockResponse histStockResponse = new HistStockResponse();
-		System.out.println(">>> stkcode !");
-		System.out.println(histStockRequest);
-		histStockResponse.setData(
-				histStockDataService.selectHists(histStockRequest.getStockCode(), histStockRequest.getStartDt()));
+		log.debug(">>> selectHists! Request: {}!",histStockRequest);
+		try {
+			histStockResponse.setData(
+					histStockDataService.selectHists(histStockRequest));
+		}catch(FindHistDataException fhde) {
+			fhde.printStackTrace();
+		}
 		return histStockResponse;
 	}
-
-	@PostMapping(value = "/dtrange/stkcode", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public Object selectHists(String stockCode, Date startDt, Date endDt) {
-
-		return null;
-	}
-
-//	@PostMapping(value = "/dtrange/model", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-//	public Object selectHists(HistStockRequest histStockRequest) {
-//
-//		return null;
-//	}
-
 }
