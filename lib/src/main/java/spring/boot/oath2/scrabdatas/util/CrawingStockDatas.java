@@ -43,6 +43,9 @@ import spring.boot.oath2.scrabdatas.entity.StockEntity;
 import spring.boot.oath2.scrabdatas.model.StockModel;
 import spring.boot.oath2.scrabdatas.property.ScrawProperty;
 
+/**
+ * 爬YAHOO資料工具
+ */
 @Component
 public class CrawingStockDatas {
 

@@ -62,11 +62,8 @@ public class CrawingController {
 	 */
 	@GetMapping(value = "/scrawinghist", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public String startToScrawStockHistData(boolean saveToDb,boolean isHist) {
-		log.debug(">>> start to scrawing hist data!");
-		System.setProperty("http.proxyHost", scrawProperty.getHost());
-		System.setProperty("http.proxyPort", scrawProperty.getPort());
-		System.setProperty("https.proxyHost", scrawProperty.getHost());
-		System.setProperty("https.proxyPort", scrawProperty.getPort());
+		log.debug(">>> Start to scrawing hist data!");
+		resetProxy();
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -85,4 +82,15 @@ public class CrawingController {
 		return "";
 	}
 
+	/**
+	 * 重設代理
+	 */
+	private void resetProxy() {
+		log.debug(">>> Reset Proxy, http.proxyHost: {}, http.proxyPort: {}, https.proxyHost: {}, https.proxyPort: {}",scrawProperty.getHttpHost(),scrawProperty.getHttpPort(),scrawProperty.getHttpsHost(),scrawProperty.getHttpsPort());
+		System.setProperty("http.proxyHost", scrawProperty.getHttpHost());
+		System.setProperty("http.proxyPort", scrawProperty.getHttpPort());
+		System.setProperty("https.proxyHost", scrawProperty.getHttpsHost());
+		System.setProperty("https.proxyPort", scrawProperty.getHttpsPort());
+	}
+	
 }

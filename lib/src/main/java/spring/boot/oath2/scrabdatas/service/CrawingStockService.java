@@ -7,6 +7,10 @@ import org.springframework.stereotype.Service;
 
 import spring.boot.oath2.scrabdatas.model.StockModel;
 
+
+/**
+ * 查詢Stock資料 Service
+ */
 public interface CrawingStockService {
 	
 	public List<String> quoteStockContents();
