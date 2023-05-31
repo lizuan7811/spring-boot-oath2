@@ -149,7 +149,8 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 		http.authorizeRequests()
 		.mvcMatchers("/login.html").permitAll()
-		.mvcMatchers("/histstock/*").permitAll()
+		.mvcMatchers("/crawing/*").permitAll()
+		.mvcMatchers("/findhist/*").permitAll()
 		.mvcMatchers("/index/*").permitAll().anyRequest()
 				.authenticated().and().formLogin().loginPage("/startlogin")
 				.loginProcessingUrl("/doLogin")

@@ -4,16 +4,10 @@ server:
 logging:
   config: 'config/logback.xml'
 spring:
+  messages:
+    basename: i18n/messages
   config:
     import: "database/db-ut.properties"
-  http:
-    proxy:
-      host: 65.108.250.129
-      port: 8080
-  https:
-    proxy:
-      host: 65.108.250.129
-      port: 8080
 #  datasource:
 #    url: jdbc:sqlserver://192.168.126.128:30516;databaseName=lizdb;encrypt=true;trustServerCertificate=true;
 #    username: 'sa'
@@ -59,7 +53,9 @@ scraw:
   stock-pure-code-file: "config/stockpurecode.txt"
   stock-histdata-file: "config/stockhistdata.txt"
   startYear: 2010
-  host: '65.108.250.129'
-  port: '8080'
+  http-host: '65.108.250.129'
+  http-port: '8080'
+  https-host: '65.108.250.129'
+  https-port: '8080'
   base-rand-time: 2000
   rand-time: 1000

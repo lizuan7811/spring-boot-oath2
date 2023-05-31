@@ -1,12 +1,24 @@
 package spring.boot.oath2.scrabdatas.service.impl;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
+import java.time.chrono.Chronology;
+import java.time.chrono.MinguoChronology;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DecimalStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
+import org.jsoup.internal.StringUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,39 +38,42 @@ public class HistStockDataServiceImpl implements HistStockDataService {
 	@Autowired
 	private StockHistRepo stockHistRepo;
 
+	@PersistenceContext
+	private EntityManager em;
+
 	@Override
-	public List<StockHistModel> selectHists(@Valid HistStockRequest histStockRequest) throws FindHistDataException {
+	public List<StockHistModel> selectHists(HistStockRequest histStockRequest) throws FindHistDataException {
 		List<StockHistModel> respList = new ArrayList<StockHistModel>();
 		String selectStr = histStockRequest.getSelectType();
 
 		SelectType selectType = SelectType.getSelectType(selectStr);
-		String stockCode=histStockRequest.getStockCode();
-		String startDt=histStockRequest.getStartDt();
-		String endDt=histStockRequest.getEndDt();
-		
+		String stockCode = histStockRequest.getStockCode();
+		String startDt = histStockRequest.getStartDt();
+		String endDt = histStockRequest.getEndDt();
+
 		switch (selectType) {
 //			查一支一天
 			case STKCODE_ONEDAY:
-				if(StringUtils.isBlank(stockCode)) {
-					throw new FindHistDataException("Stock code is blank");
+				if (startDt.equals(endDt) && StringUtils.isNotBlank(stockCode)) {
+					respList = findStkOneADay(histStockRequest.getStockCode(), startDt);
 				}
-				respList=findStkOneADay(histStockRequest.getStockCode(),startDt);
 				break;
 //			查一支多天
 			case STKCODE_MOREDAY:
-				respList=findStkMoreDay(histStockRequest.getStockCode(), histStockRequest.getStartDt(),histStockRequest.getEndDt());
+				if (StringUtils.isNotBlank(stockCode) && validDate(startDt, endDt))
+					respList = findStkMoreDay(stockCode, startDt, endDt);
 				break;
 //			查一支所有天
 			case STKCODE_ALL:
-				respList=findStkAll(histStockRequest.getStockCode());
+				respList = findStkAll(histStockRequest.getStockCode());
 				break;
 //			所有支一天
 			case ALLCODE_ONEDAY:
-				if(!startDt.equals(endDt)) {
-//					throw new FindHistDataException("");
+				if (!startDt.equals(endDt)) {
+					throw new FindHistDataException("CRAWING.HISTENDDATE.NOTVALID");
 				}
-				respList=findStkallOneDay(histStockRequest.getStartDt());
-			    break;
+				respList = findStkallOneDay(histStockRequest.getStartDt());
+				break;
 		}
 		return respList;
 	}
@@ -77,24 +92,60 @@ public class HistStockDataServiceImpl implements HistStockDataService {
 		}
 		return respList;
 	}
-	
+
 	/**
 	 * 查one code range day
 	 */
-	private List<StockHistModel> findStkMoreDay(String stockCode, String startDt,String endDt) {
+	private List<StockHistModel> findStkMoreDay(String stockCode, String startDt, String endDt) {
 		List<StockHistModel> respList = new ArrayList<StockHistModel>();
+		if (validDate(startDt, endDt)) {
+			List<StockHistEntity> resultList = stockHistRepo.findByPkBetweenStartDtAndEndDt(stockCode, startDt, endDt);
+			resultList.stream().forEach(result -> {
+				StockHistModel respModel = new StockHistModel();
+				BeanUtils.copyProperties(result, respModel);
+				respList.add(respModel);
+			});
+		}
 		return respList;
 	}
 
-	private List<StockHistModel> findStkallOneDay(String aDt){
+	private List<StockHistModel> findStkallOneDay(String aDt) {
 		List<StockHistModel> respList = new ArrayList<StockHistModel>();
-		return respList;
-	}
-	
-	private List<StockHistModel> findStkAll(String stockCode){
-		List<StockHistModel> respList = new ArrayList<StockHistModel>();
+		List<StockHistEntity> resultList = stockHistRepo.findStkallOneDay(aDt);
+		resultList.stream().forEach(result -> {
+			StockHistModel respModel = new StockHistModel();
+			BeanUtils.copyProperties(result, respModel);
+			respList.add(respModel);
+		});
+
 		return respList;
 	}
 
-	
+	private List<StockHistModel> findStkAll(String stockCode) {
+		List<StockHistModel> respList = new ArrayList<StockHistModel>();
+		List<StockHistEntity> resultList = stockHistRepo.findAllByStockCode(stockCode);
+		resultList.stream().forEach(result -> {
+			StockHistModel respModel = new StockHistModel();
+			BeanUtils.copyProperties(result, respModel);
+			respList.add(respModel);
+		});
+		return respList;
+	}
+
+	private boolean validDate(String startDt, String endDt) {
+		boolean isValid = false;
+		if (!startDt.equals(endDt)) {
+			Chronology chrono = MinguoChronology.INSTANCE;
+			DateTimeFormatter df = new DateTimeFormatterBuilder().parseLenient().appendPattern("yyy-MM-dd").toFormatter()
+					.withChronology(chrono).withDecimalStyle(DecimalStyle.of(Locale.getDefault()));
+			ChronoLocalDate startDate = chrono.date(df.parse(startDt));
+			ChronoLocalDate endDate = chrono.date(df.parse(endDt));
+			
+			isValid =startDate.isBefore(endDate);
+//			isValid = LocalDateTime.parse(fmtStartDt.trim(), DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+//					.isBefore(LocalDateTime.parse(fmtendDt.trim(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+		}
+		return isValid;
+	}
+
 }
