@@ -114,6 +114,13 @@ dependencies {
 	implementation group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.2.0.jre11'
 	// https://mvnrepository.com/artifact/org.jfree/jfreechart
 	implementation 'org.jfree:jfreechart:1.5.4'
+	
+	// https://mvnrepository.com/artifact/sshtools/j2ssh-core
+	implementation group: 'sshtools', name: 'j2ssh-core', version: '0.2.9'
+	// https://mvnrepository.com/artifact/sshtools/j2ssh-common
+	implementation group: 'sshtools', name: 'j2ssh-common', version: '0.2.9'
+	
+	
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-resource-server
 	//	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server:3.0.5'
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-client

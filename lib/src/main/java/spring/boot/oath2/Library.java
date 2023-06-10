@@ -3,9 +3,14 @@
  */
 package spring.boot.oath2;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.DSAPublicKey;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -13,20 +18,52 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
+import com.sshtools.j2ssh.transport.publickey.InvalidSshKeyException;
+import com.sshtools.j2ssh.transport.publickey.SshPublicKey;
 
 import spring.boot.oath2.websecurity.entity.Role;
 import spring.boot.oath2.websecurity.entity.User;
+import com.sshtools.j2ssh.transport.publickey.dsa.SshDssPublicKey;
 
-
-@SpringBootApplication(scanBasePackages = { "spring.boot.oath2","spring.boot.oath2.websecurity"})
-@EnableJpaRepositories(basePackages = "spring.boot.oath2.websecurity")
+//@SpringBootApplication(scanBasePackages = { "spring.boot.oath2","spring.boot.oath2.websecurity"})
+//@EnableJpaRepositories(basePackages = "spring.boot.oath2.websecurity")
 //@EntityScan(basePackages = "spring.boot.oath2.model")
 //須設定掃描service、controller...bean的註解
 //@ComponentScan(basePackages="spring.boot.oath2")
 public class Library {
-	public static void main(String[] args) {
-		SpringApplication.run(Library.class,args);
-		Map<Object,String>map=new HashMap<>(2);
-		String mapResult=map.put(map, null);
-    }
+
+	@Autowired
+	private static HttpSecurity hs;
+
+	public static void main(String[] args) throws NoSuchAlgorithmException {
+		// 假设已经获取到了公钥对象 publicKey
+		SshPublicKey publicKey;
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("DSA");
+		keyPairGenerator.initialize(2048); // 设置密钥长度
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+		SshDssPublicKey pubkey=new SshDssPublicKey((DSAPublicKey) keyPair.getPublic());
+
+		// 获取公钥的字节数组形式
+		byte[] publicKeyBytes = pubkey.getEncoded();
+
+		// 使用公钥的字节数组创建 X509EncodedKeySpec 对象
+		String fingerprint = pubkey.getFingerprint();
+		System.out.println("Public key fingerprint: " + fingerprint);
+
+	}
+
+//	public static void main(String[] args) throws Exception {
+////		SpringApplication.run(Library.class,args);
+////		Map<Object,String>map=new HashMap<>(2);
+////		String mapResult=map.put(map, null);
+//		System.out.println(0xF0);
+//		System.out.println(0x0F);
+//		
+//		hs.authorizeRequests().anyRequest().access(null);
+//		
+//		
+//		
+//    }
 }
