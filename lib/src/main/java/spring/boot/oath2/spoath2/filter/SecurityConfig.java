@@ -19,9 +19,9 @@ import org.springframework.security.web.SecurityFilterChain;
 
 
 //@Configuration
-@Configuration
-@EnableWebSecurity
-@PropertySource("classpath:application.yml")
+//@Configuration
+//@EnableWebSecurity
+//@PropertySource("classpath:application.yml")
 public class SecurityConfig {
 //	@Bean
 //	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

@@ -19,9 +19,9 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Configuration
-@EnableWebSecurity
-@PropertySource("classpath:application.yml")
+//@Configuration
+//@EnableWebSecurity
+//@PropertySource("classpath:application.yml")
 public class SecurityConfig {
 
 	private static List<String>clients=Arrays.asList("google","facebook");

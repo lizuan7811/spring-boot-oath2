@@ -17,7 +17,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.stereotype.Component;
 @Component
-@EnableAuthorizationServer
+//@EnableAuthorizationServer
 public class OAth2AuthorizationServer extends AuthorizationServerConfigurerAdapter{
 
 	@Autowired

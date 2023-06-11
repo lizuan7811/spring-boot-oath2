@@ -33,10 +33,10 @@ spring:
 #        query:
 #          substitutions: true 1, false 0  
 #      database-platform: org.hibernate.dialect.SQLServer2012Dialect
-  security:
-   user:
-      name: "admin"
-      password: "Mars@@@7811"
+#  security:
+#   user:
+#      name: "admin"
+#      password: "Mars@@@7811"
 #    oauth2:
 #      client:
 #        registration:

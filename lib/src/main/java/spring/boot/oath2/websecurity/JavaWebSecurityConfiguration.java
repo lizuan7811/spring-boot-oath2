@@ -150,19 +150,18 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests()
 		.mvcMatchers("/login.html").permitAll()
 		.mvcMatchers("/crawing/*").permitAll()
-		.mvcMatchers("/findhist/*").permitAll()
+		.mvcMatchers("/findhist/*").permitAll().and().csrf().disable().authorizeRequests()
 		.mvcMatchers("/index/*").permitAll().anyRequest()
 				.authenticated().and().formLogin().loginPage("/startlogin")
 				.loginProcessingUrl("/doLogin")
 				.usernameParameter("Username")
-				.passwordParameter("Password")
+				.passwordParameter("Password").and()
 //		只適合傳統web開發
 //		.successForwardUrl("/index/hello");
 
 //		前後端分離方式
 //				.successHandler(new SelfDefiAuth())
 //				.failureHandler(new SelfDefiAuthFail())
-				.and()
 				.logout()
 //				.logoutUrl("/logout")
 				.logoutRequestMatcher(new OrRequestMatcher(

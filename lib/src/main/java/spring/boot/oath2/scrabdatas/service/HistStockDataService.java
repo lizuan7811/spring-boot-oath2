@@ -8,5 +8,6 @@ import spring.boot.oath2.scrabdatas.request.HistStockRequest;
 
 public interface HistStockDataService {
 	public List<StockHistModel> selectHists(HistStockRequest histStockRequest)throws FindHistDataException;
+	public List<StockHistModel> selectHists();
 
 }
