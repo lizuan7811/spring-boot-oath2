@@ -2,7 +2,7 @@ server:
   port: 9999
   debug: true
 logging:
-  config: 'file:src/main/resources/logback.xml'
+  config: 'file:lib/src/main/resources/logback.xml'
 spring:
   messages:
     basename: i18n/messages
@@ -71,9 +71,9 @@ scraw:
   stock-pure-code-file: "src/main/resources/stockpurecode.txt"
   stock-histdata-file: "src/main/resources/stockhistdata.txt"
   startYear: 2010
-  http-host: '65.108.250.129'
-  http-port: '8080'
-  https-host: '65.108.250.129'
-  https-port: '8080'
+  http-host: '170.83.242.250'
+  http-port: '999'
+  https-host: '170.83.242.250'
+  https-port: '999'
   base-rand-time: 2000
   rand-time: 1000

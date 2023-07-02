@@ -26,6 +26,8 @@ public class ConnectionFactory {
 		httpsURLConnection.setRequestProperty("user-agent",
 				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36");
 		httpsURLConnection.setInstanceFollowRedirects(false); // 禁止自动重定向
+		httpsURLConnection.setRequestProperty("Content-Type",
+                "application/x-www-form-urlencoded;charset="+"UTF-8");
 //		httpsURLConnection.setRequestProperty("Connection", "keep-alive");
 		System.out.println(url);
 		int statusCode = httpsURLConnection.getResponseCode();

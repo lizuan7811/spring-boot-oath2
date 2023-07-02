@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -254,7 +255,7 @@ public class CrawingStockDatas {
 		if (StringUtils.isNotBlank(rdLine)) {
 			List<String> fmtFirList = new ArrayList<String>();
 			if (fromInternet) {
-				org.jsoup.nodes.Document doc = Jsoup.parse(rdLine);
+				Document doc = Jsoup.parse(rdLine);
 				Elements elem = doc.getElementsByClass(START_DIV_CLASS);
 				Elements spanElem = elem.select("span");
 				String spanString = spanElem.text();

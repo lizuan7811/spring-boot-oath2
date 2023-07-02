@@ -6,14 +6,21 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.util.ReflectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
+import spring.boot.oath2.scrabdatas.model.HtmlParseResult;
 import spring.boot.oath2.scrabdatas.model.StockModel;
 
 public class NormalUtils {
@@ -38,11 +45,11 @@ public class NormalUtils {
 				ReflectionUtils.makeAccessible(fields[i]);
 				if (fields[i].getName().equals("stockCode")) {
 					continue;
-				}else if(fields[i].getName().equals("date")) {
+				} else if (fields[i].getName().equals("date")) {
 					fields[i].set(objT, sourceList.get(i - 1).replaceAll("/", "-"));
 					continue;
 				}
-				
+
 				fields[i].set(objT, sourceList.get(i - 1));
 				fieldIndex = i;
 			}
@@ -75,18 +82,23 @@ public class NormalUtils {
 	}
 
 	public static String getLocalDate() {
-		return  LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+		return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 	}
-	
-	public static <T>Object parseJson(String jsonString,Class<T> classT) {
+
+	public static <T> Object parseJson(String jsonString, Class<T> classT) {
 		ObjectMapper objMap = new ObjectMapper();
 		try {
-			if(StringUtils.isNotBlank(jsonString)) {
+			if (StringUtils.isNotBlank(jsonString)) {
 				return (T) objMap.readValue(jsonString, classT);
 			}
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static Document parseHtmlToDoc(String rdLine) {
+		Document doc = Jsoup.parse(rdLine);
+		return doc;
 	}
 }
