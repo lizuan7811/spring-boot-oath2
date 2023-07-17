@@ -12,6 +12,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import spring.boot.oath2.websecurity.entity.Role;
 
+/**
+ * 使用者Details
+ */
 public class UserDet implements UserDetails{
 
 	@Override

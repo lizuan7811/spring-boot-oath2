@@ -31,18 +31,14 @@ import spring.boot.oath2.websecurity.controller.SelfDefiAuth;
 import spring.boot.oath2.websecurity.controller.SelfDefiAuthFail;
 import spring.boot.oath2.websecurity.controller.SelfLogoutSuccessed;
 import spring.boot.oath2.websecurity.filter.LoginFilter;
-import spring.boot.oath2.websecurity.service.SelfUserDetailService;
+import spring.boot.oath2.websecurity.service.SelfUserDetailServiceImpl;
 
 @Configuration
 @EnableWebSecurity
 public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
-	private SelfUserDetailService selfUserDetailService;
-//	@Autowired
-//	public JavaWebSecurityConfiguration(SelfUserDetailService selfUserDetailService){
-//		this.selfUserDetailService=selfUserDetailService;
-//	}
+	private SelfUserDetailServiceImpl selfUserDetailService;
 	
 //	需自訂一登入資訊的格式。
 	@Bean
@@ -81,55 +77,7 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Override
 	protected UserDetailsService userDetailsService() {
 		return selfUserDetailService;
-////		持久化儲存的資料
-//		JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();
-//		jdbcUserDetailsManager.setDataSource(dataSource);
-////		jdbcUserDetailsManager.createUser(User.withUsername("admin").password("Admin@@@111").authorities("ADMIN").build());
-////		不持久化儲存的資料
-////		InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-////		jdbcUserDetailsManager.setDataSource(dataSource);
-////		manager.createUser(User.withUsername("admin").password("Admin@@@111").authorities("ADMIN").build());
-////		manager.createUser(User.withUsername("user_1").password("User@@@111").authorities("USER").build());
-//		return jdbcUserDetailsManager;
 	}
-	
-//	@Bean
-//	public UserDetailsService userDetailsService() {
-//		InMemoryUserDetailsManager userDetailsService=new InMemoryUserDetailsManager();
-//		userDetailsService.createUser(User.withUsername("lizuan").password("{noop}Admin@@@111").build());
-//		return userDetailsService;
-//	}
-	
-//	有了UserDetailsService，預設的initilaize如果寫了相同的程式碼，就是多的
-//	@Autowired
-//	public void initialize(AuthenticationManagerBuilder builder) {
-//		try {
-//		InMemoryUserDetailsManager userDetailsService=new InMemoryUserDetailsManager();
-//		userDetailsService.createUser(User.withUsername("lizuan").password("{noop}Admin@@@111").build());
-//			builder.userDetailsService(userDetailsService);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
-	
-//	自定義的方法，全部都要自定義
-//	@Autowired
-//	public void configure(AuthenticationManagerBuilder builder) {
-//		try {
-//			System.out.println("自定義AuthenticationManager:\t"+builder);
-//			builder.userDetailsService(selfUserDetailService);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		
-////		System.out.println("自定義AuthenticationManager:"+builder);
-////		try {
-////			builder.userDetailsService(userDetailsService());
-////		} catch (Exception e) {
-////			e.printStackTrace();
-////		}
-//	}
 	
 //	將AuthenticationManager開放讓其他地方使用
 	@Bean
@@ -189,16 +137,16 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				});
 	}
 
-//	@Bean
-//	public PasswordEncoder passwordEncoder() {
-//		return new BCryptPasswordEncoder();
-//	}
-//	
-//	@Bean
-//	public DaoAuthenticationProvider authProvider() {
-//		DaoAuthenticationProvider authProvider=new DaoAuthenticationProvider();
-//		authProvider.setUserDetailsService(userDetailsService());
-//		authProvider.setPasswordEncoder(passwordEncoder());
-//		return authProvider;
-//	}
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+	
+	@Bean
+	public DaoAuthenticationProvider authProvider() {
+		DaoAuthenticationProvider authProvider=new DaoAuthenticationProvider();
+		authProvider.setUserDetailsService(userDetailsService());
+		authProvider.setPasswordEncoder(passwordEncoder());
+		return authProvider;
+	}
 }

@@ -14,20 +14,20 @@ import spring.boot.oath2.websecurity.service.ConvertEntityToModel;
 public class convertEntityToModelImpl implements ConvertEntityToModel {
 
 	@Override
-	public <F, D> D convertEntity(F clazF, D clazD) {
+	public <F, D> D convertEntityToModel(F clazFrom, D clazDest) {
 
 		try {
-			System.out.println(">>> convertEntity");
-			Field[] fields = clazF.getClass().getDeclaredFields();
+			System.out.println(">>> ConvertEntity");
+			Field[] fields = clazFrom.getClass().getDeclaredFields();
 			Arrays.asList(fields).stream().filter(field->{
 				ReflectionUtils.makeAccessible(field);
 				return !field.getName().equals("serialVersionUID");
 			}).forEach(field -> {
 				try {
 					ReflectionUtils.makeAccessible(field);
-					Field fieldD = clazD.getClass().getDeclaredField(field.getName());
+					Field fieldD = clazDest.getClass().getDeclaredField(field.getName());
 					ReflectionUtils.makeAccessible(fieldD);
-					fieldD.set(clazD, field.get(clazF));
+					fieldD.set(clazDest, field.get(clazFrom));
 				} catch (NoSuchFieldException e) {
 					e.printStackTrace();
 				} catch (SecurityException e) {
@@ -42,7 +42,7 @@ public class convertEntityToModelImpl implements ConvertEntityToModel {
 		} catch (IllegalArgumentException | SecurityException e) {
 			e.printStackTrace();
 		}
-		return clazD;
+		return clazDest;
 	}
 
 }

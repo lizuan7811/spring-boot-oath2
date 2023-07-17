@@ -22,25 +22,25 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name="usertb")
+@Table(name="USERTB")
 public class User implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 	@Id
-	@Column(name="id")
+	@Column(name="ID")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	@Column(name="username")
+	@Column(name="USERNAME")
 	private String username;
-	@Column(name="password")
+	@Column(name="PASSWORD")
 	private String password;
-	@Column(name="enabled")
+	@Column(name="ENABLED")
 	private Boolean enabled;
-	@Column(name="accountnonexpired")
+	@Column(name="ACCOUNTNONEXPIRED")
 	private Boolean accountNonExpired;
-	@Column(name="accountnonlocked")
+	@Column(name="ACCOUNTNONLOCKED")
 	private Boolean accountNonLocked;
-	@Column(name="credentialsnonexpired")
+	@Column(name="CREDENTIALSNONEXPIRED")
 	private Boolean credentialsNonExpired;
 	
 }

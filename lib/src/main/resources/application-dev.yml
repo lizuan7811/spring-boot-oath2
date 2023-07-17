@@ -2,7 +2,7 @@ server:
   port: 9999
   debug: true
 logging:
-  config: 'file:lib/src/main/resources/logback.xml'
+  config: 'src/main/resources/logback.xml'
 spring:
   messages:
     basename: i18n/messages
@@ -33,10 +33,10 @@ spring:
 #        query:
 #          substitutions: true 1, false 0  
 #      database-platform: org.hibernate.dialect.SQLServer2012Dialect
-#  security:
-#   user:
-#      name: "admin"
-#      password: "Mars@@@7811"
+  security:
+   user:
+      name: "lizuan"
+      password: "$2a$10$LDqK0ms6BbW3/9nGcGHTi.AnROGIl2GBUlwGQ8jufBM8Er1IpfTGi"     #"Mars@@@7811"
 #    oauth2:
 #      client:
 #        registration:

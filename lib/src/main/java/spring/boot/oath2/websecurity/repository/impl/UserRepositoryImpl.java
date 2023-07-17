@@ -43,4 +43,18 @@ public class UserRepositoryImpl<T> extends UserRepository<T>{
 		return (List<T>)typeQuery.getResultList();
 	}
 
+	public List<T> getRoleByuid(String userName,Class<T> cla) {
+		
+//		User.id==UserRole.uid & UserRole.rid==Role.id
+//		UserRole.uid不為pk，所以會有多個。
+		
+		CriteriaBuilder criteriaBuilder=entityManager.getCriteriaBuilder();
+		CriteriaQuery<T> cQuery=criteriaBuilder.createQuery(cla);
+		Root<T> root=cQuery.from(cla);
+		Predicate predName =criteriaBuilder.equal(root.get("id"), id);
+		cQuery.where(predName);
+		TypedQuery<T> typeQuery=entityManager.createQuery(cQuery);
+		return (List<T>)typeQuery.getResultList();
+	}
+	
 }

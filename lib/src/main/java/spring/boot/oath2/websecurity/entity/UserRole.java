@@ -12,18 +12,19 @@ import javax.persistence.Table;
 import lombok.Data;
 @Data
 @Entity
-@Table(name="user_role")
+@Table(name="USERROLE")
 public class UserRole implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="id")
+	@Column(name="ID")
 	private Integer id;
 
-	@Column(name="uid")
+//	使用者ID
+	@Column(name="UID")
 	private Integer uid;
-
-	@Column(name="rid")
+//	ROLE的ID
+	@Column(name="RID")
 	private Integer rid;
 }

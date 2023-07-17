@@ -13,15 +13,15 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "role")
+@Table(name = "ROLE")
 public class Role implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
+	@Column(name = "ID")
 	private Integer id;
-	@Column(name = "name")
+	@Column(name = "NAME")
 	private String name;
-	@Column(name = "name_zh", columnDefinition = "NVARCHAR(32)")
+	@Column(name = "NAME_ZH", columnDefinition = "NVARCHAR(32)")
 	private String name_zh;
 }
