@@ -51,7 +51,7 @@ public class UserRepositoryImpl<T> extends UserRepository<T>{
 		CriteriaBuilder criteriaBuilder=entityManager.getCriteriaBuilder();
 		CriteriaQuery<T> cQuery=criteriaBuilder.createQuery(cla);
 		Root<T> root=cQuery.from(cla);
-		Predicate predName =criteriaBuilder.equal(root.get("id"), id);
+		Predicate predName =criteriaBuilder.equal(root.get("username"), userName);
 		cQuery.where(predName);
 		TypedQuery<T> typeQuery=entityManager.createQuery(cQuery);
 		return (List<T>)typeQuery.getResultList();

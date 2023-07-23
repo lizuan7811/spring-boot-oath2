@@ -5,17 +5,17 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import spring.boot.oath2.websecurity.entity.Role;
 
 /**
  * 使用者Details
  */
 public class UserDet implements UserDetails{
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public String toString() {

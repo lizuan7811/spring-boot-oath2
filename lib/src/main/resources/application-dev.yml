@@ -34,9 +34,17 @@ spring:
 #          substitutions: true 1, false 0  
 #      database-platform: org.hibernate.dialect.SQLServer2012Dialect
   security:
-   user:
+    user:
       name: "lizuan"
       password: "$2a$10$LDqK0ms6BbW3/9nGcGHTi.AnROGIl2GBUlwGQ8jufBM8Er1IpfTGi"     #"Mars@@@7811"
+  selfconfig:
+    passwd-encrypt-type: "MD5"
+  
+  thymeleaf:    
+    prefix: classpath:/templates/
+    #suffix: .html
+    #cache: false
+      
 #    oauth2:
 #      client:
 #        registration:
@@ -49,23 +57,26 @@ spring:
 #    oauth2:
 #      resource:
 #        filter-order: 3
-#  thymeleaf:
+
+
+# thymeleaf:
 #    thymeleaf:
     # 开启视图解析
-#    enabled: false
+    # enabled: false
     #编码格式
-#    encoding: UTF-8
+    #encoding: UTF-8
     #前缀配置
-#    prefix: /templates/
+    #prefix: /templates/
     # 后缀配置
-#    suffix: .html
+    #suffix: .html
     #是否使用缓存 开发环境时不设置缓存
-#    cache: false
+#   cache: false
     # 格式为 HTML 格式
 #    mode: HTML5
     # 配置类型
 #    servlet:
 #      content-type: text/html
+
 scraw:
   stock-hist-fqdn: "https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=${DATE}&stockNo=${STOCKNO}"
   stock-pure-code-file: "src/main/resources/stockpurecode.txt"

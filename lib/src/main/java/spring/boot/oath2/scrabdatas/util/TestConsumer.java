@@ -12,7 +12,6 @@ import java.util.function.Consumer;
 
 import org.apache.logging.log4j.util.Strings;
 
-import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 public class TestConsumer {
 	public static void main(String[] args) {

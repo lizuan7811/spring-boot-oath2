@@ -11,17 +11,17 @@ import org.springframework.util.ReflectionUtils;
 import spring.boot.oath2.websecurity.service.ConvertEntityToModel;
 
 @Component
-public class convertEntityToModelImpl implements ConvertEntityToModel {
+public class ConvertEntityToModelImpl implements ConvertEntityToModel {
 
 	@Override
-	public <F, D> D convertEntityToModel(F clazFrom, D clazDest) {
+	public  <F, D> D convertEntityToModel(F clazFrom, D clazDest) {
 
 		try {
 			System.out.println(">>> ConvertEntity");
 			Field[] fields = clazFrom.getClass().getDeclaredFields();
 			Arrays.asList(fields).stream().filter(field->{
 				ReflectionUtils.makeAccessible(field);
-				return !field.getName().equals("serialVersionUID");
+				return !field.getName().equals("serialVersionUID") && !field.getName().equals("roles");
 			}).forEach(field -> {
 				try {
 					ReflectionUtils.makeAccessible(field);

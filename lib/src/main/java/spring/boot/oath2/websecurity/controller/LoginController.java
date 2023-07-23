@@ -8,17 +8,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@Controller
 public class LoginController {
 
-	@RequestMapping(value="/startlogin",consumes=MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
-	public String login() {
-		System.out.println("login");
+	@RequestMapping("/doLogin")
+	public String doLogin() {
+		System.out.println("doLogin");
 		return "login";
 	}
-	@PostMapping(value="/doLogin",consumes=MediaType.APPLICATION_JSON_VALUE,produces=MediaType.APPLICATION_JSON_VALUE)
-	public String doLogin(@RequestParam("Username") String username, @RequestParam("Password") String password) {
-		System.out.println("login");
+
+	@RequestMapping("/loginpage")
+	public String loginpage() {
+		
+		System.out.println("loginpage");
 		return "login";
 	}
+	
+	@RequestMapping("/errorpage")
+	public String loginError() {
+		
+		System.out.println("error");
+		return "error";
+	}
+	
 }
