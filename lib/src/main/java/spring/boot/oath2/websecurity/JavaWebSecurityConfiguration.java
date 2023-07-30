@@ -55,12 +55,6 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		this.passwordEncoder = passwordEncoder;
 	}
 
-//	將AuthenticationManager開放讓其他地方使用
-	@Bean
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
-	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -99,8 +93,6 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				});
 //		TODO 需要addFilter()
 	}
-
-//
 
 	/**
 	 * 自定義登入時需過慮使用的Filter。
@@ -143,16 +135,6 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	protected UserDetailsService userDetailsService() {
 		return selfUserDetailService;
 	}
-////		持久化儲存的資料
-//		JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager();
-//		jdbcUserDetailsManager.setDataSource(dataSource);
-////		jdbcUserDetailsManager.createUser(User.withUsername("admin").password("Admin@@@111").authorities("ADMIN").build());
-////		不持久化儲存的資料
-////		InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-////		jdbcUserDetailsManager.setDataSource(dataSource);
-////		manager.createUser(User.withUsername("admin").password("Admin@@@111").authorities("ADMIN").build());
-////		manager.createUser(User.withUsername("user_1").password("User@@@111").authorities("USER").build());
-//		return jdbcUserDetailsManager;
 
 	/**
 	 * 若使用自定義的身分驗證方法，所以使用者資料的來源就需要自定義 <br>
@@ -162,32 +144,18 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	 * {@link UserDetailsService}, and adding {@link AuthenticationProvider}'s.
 	 *
 	 */
-
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(selfUserDetailService).passwordEncoder(passwordEncoder)
 				.userDetailsPasswordManager(selfUserDetailService);
 	}
-
-//	@Bean
-//	public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-//		AuthenticationManagerBuilder authenticationManagerBuilder = http
-//				.getSharedObject(AuthenticationManagerBuilder.class);
-//		authenticationManagerBuilder.authenticationProvider(null).userDetailsService(selfUserDetailService)
-//				.passwordEncoder(PasswordEncoderFactories.createDelegatingPasswordEncoder())
-//				.userDetailsPasswordManager(selfUserDetailService);
-//		return authenticationManagerBuilder.build();
-//	}
-
-//	@Bean
-//	/**
-//	 * 若已經有AuthenticationManagerBuilder身分驗證的方法，就不需要再另外配authProvider，因為AuthenticationManagerBuilder裡面已經存在驗證的方法。
-//	 */
-//	public DaoAuthenticationProvider authProvider() {
-//		DaoAuthenticationProvider authProvider=new DaoAuthenticationProvider();
-//		authProvider.setUserDetailsService(userDetailsService());
-//		authProvider.setPasswordEncoder(passwordEncoder());
-//		return authProvider;
-//	}
-
+	
+	/**
+	 *	將AuthenticationManager開放讓其他地方使用
+	 */
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		return super.authenticationManagerBean();
+	}
 }
