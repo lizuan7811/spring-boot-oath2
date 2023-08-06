@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -29,6 +30,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -49,50 +53,57 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	private final PasswordEncoder passwordEncoder;
 
+	private final TokenStore tokenStore;
+	
+	private final JwtAccessTokenConverter jwtAccessTokenConverter;
+	
 	@Autowired
-	public JavaWebSecurityConfiguration(SelfUserDetailService selfUserDetailService, PasswordEncoder passwordEncoder) {
+	public JavaWebSecurityConfiguration(SelfUserDetailService selfUserDetailService, PasswordEncoder passwordEncoder,TokenStore tokenStore,JwtAccessTokenConverter jwtAccessTokenConverter) {
 		this.selfUserDetailService = selfUserDetailService;
 		this.passwordEncoder = passwordEncoder;
+		this.tokenStore=tokenStore;
+		this.jwtAccessTokenConverter=jwtAccessTokenConverter;
 	}
 
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-
-		// .mvcMatchers("/loginpage")中的允許的URL是作為API去被CALL使用，而.loginPage("/loginpage")就代表當請求送進去後，將會打到/loginpage上，同時需要controller存在Mapping去接收，return
-		// 的view也要存在templates資料夾中，這樣才能順利導到網頁。
-		http.authorizeRequests().mvcMatchers("/loginpage").permitAll().anyRequest().authenticated().and().formLogin()
-				.loginPage("/loginpage").loginProcessingUrl("/doLogin")
-				// 預設驗證成功的URL
-				.defaultSuccessUrl("/login")
-				// 預設驗證失敗的URL
-				.failureUrl("/login").usernameParameter("uname").passwordParameter("passwd")
-				// 前後端分離方式
-				// 驗證成功管理
-				.successHandler(new SelfDefiAuth())
-				// 驗證失敗處理
-				.failureHandler(new SelfDefiAuthFail()).failureForwardUrl("/login.html")
-				// 失敗URL
-				.failureUrl("/errorpage").and()
-				// 登出URL
-				.logout()
-				// 指定了logout時，請求接收使用的url
-				.logoutUrl("/logout")
-				.logoutRequestMatcher(new OrRequestMatcher(new AntPathRequestMatcher("/aa", "GET"),
-						new AntPathRequestMatcher("/bb", "POST")))
-				.invalidateHttpSession(true).clearAuthentication(true).logoutSuccessHandler(new SelfLogoutSuccessed())
-				.logoutSuccessUrl("/logout").and().csrf().disable().sessionManagement().maximumSessions(1)
-				.expiredUrl("/loginpage").expiredSessionStrategy(event -> {
-					HttpServletResponse response = event.getResponse();
-					Map<String, Object> result = new HashMap<>();
-					result.put("status", 500);
-					result.put("msg", "當前Session已失效");
-					String s = new ObjectMapper().writeValueAsString(result);
-					response.getWriter().println(s);
-					response.flushBuffer();
-				});
-//		TODO 需要addFilter()
-	}
+//	@Override
+//	protected void configure(HttpSecurity http) throws Exception {
+//
+//		// .mvcMatchers("/loginpage")中的允許的URL是作為API去被CALL使用，而.loginPage("/loginpage")就代表當請求送進去後，將會打到/loginpage上，同時需要controller存在Mapping去接收，return
+//		// 的view也要存在templates資料夾中，這樣才能順利導到網頁。
+//		http.authorizeRequests().anyRequest().authenticated();
+////		http.authorizeRequests().mvcMatchers("/loginpage").permitAll().anyRequest().authenticated().and().formLogin()
+////				.loginPage("/loginpage").loginProcessingUrl("/doLogin")
+////				// 預設驗證成功的URL
+////				.defaultSuccessUrl("/login")
+////				// 預設驗證失敗的URL
+////				.failureUrl("/login").usernameParameter("uname").passwordParameter("passwd")
+////				// 前後端分離方式
+////				// 驗證成功管理
+////				.successHandler(new SelfDefiAuth())
+////				// 驗證失敗處理
+////				.failureHandler(new SelfDefiAuthFail()).failureForwardUrl("/login.html")
+////				// 失敗URL
+////				.failureUrl("/errorpage").and()
+////				// 登出URL
+////				.logout()
+////				// 指定了logout時，請求接收使用的url
+////				.logoutUrl("/logout")
+////				.logoutRequestMatcher(new OrRequestMatcher(new AntPathRequestMatcher("/aa", "GET"),
+////						new AntPathRequestMatcher("/bb", "POST")))
+////				.invalidateHttpSession(true).clearAuthentication(true).logoutSuccessHandler(new SelfLogoutSuccessed())
+////				.logoutSuccessUrl("/logout").and().csrf().disable().sessionManagement().maximumSessions(1)
+////				.expiredUrl("/loginpage").expiredSessionStrategy(event -> {
+////					HttpServletResponse response = event.getResponse();
+////					Map<String, Object> result = new HashMap<>();
+////					result.put("status", 500);
+////					result.put("msg", "當前Session已失效");
+////					String s = new ObjectMapper().writeValueAsString(result);
+////					response.getWriter().println(s);
+////					response.flushBuffer();
+////				});
+////		TODO 需要addFilter()
+//	}
 
 	/**
 	 * 自定義登入時需過慮使用的Filter。
@@ -158,4 +169,5 @@ public class JavaWebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	public AuthenticationManager authenticationManagerBean() throws Exception {
 		return super.authenticationManagerBean();
 	}
+	
 }

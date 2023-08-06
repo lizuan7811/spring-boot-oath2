@@ -3,6 +3,11 @@ server:
   debug: true
 logging:
   config: 'src/main/resources/logback.xml'
+  level:
+    org:
+      springframework:
+        security: DEBUG
+
 spring:
   messages:
     basename: i18n/messages
@@ -38,7 +43,7 @@ spring:
       name: "lizuan"
       password: "$2a$10$LDqK0ms6BbW3/9nGcGHTi.AnROGIl2GBUlwGQ8jufBM8Er1IpfTGi"     #"Mars@@@7811"
   selfconfig:
-    passwd-encrypt-type: "MD5"
+    passwd-encrypt-type: "bcrypt"
   
   thymeleaf:    
     prefix: classpath:/templates/

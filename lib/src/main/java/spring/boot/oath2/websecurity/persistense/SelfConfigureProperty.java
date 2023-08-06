@@ -12,6 +12,9 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import lombok.Data;
 
@@ -43,5 +46,17 @@ public class SelfConfigureProperty {
 		encoders.put("sha256", new org.springframework.security.crypto.password.StandardPasswordEncoder());
 		encoders.put("argon2", new Argon2PasswordEncoder());
 		return new DelegatingPasswordEncoder(encodingId, encoders);
+	}
+	
+	@Bean
+	public TokenStore tokenStore() {
+		return new JwtTokenStore(jwtAccessTokenConverter());
+	}
+
+	@Bean
+	public JwtAccessTokenConverter jwtAccessTokenConverter() {
+		final JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
+		jwtAccessTokenConverter.setSigningKey("Mars@@@7811");
+		return jwtAccessTokenConverter;
 	}
 }
